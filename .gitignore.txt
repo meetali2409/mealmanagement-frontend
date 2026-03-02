@@ -1,0 +1,18 @@
+# Node
+Frontend/node_modules
+Frontend/build
+
+# .NET
+Backend/bin/
+Backend/obj/
+
+# Visual Studio
+*.user
+*.suo
+.vs/
+
+# Logs
+*.log
+
+# Environment
+.env

@@ -1,0 +1,5 @@
+﻿public class EmployeeDto
+{
+    public string FullName { get; set; }
+    public string Password { get; set; }
+}
