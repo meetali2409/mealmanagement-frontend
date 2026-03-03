@@ -1,35 +1,44 @@
 import { useEffect, useState, useCallback } from "react";
 
 function History() {
-  const API = "https://your-render-url.onrender.com";
+  const API = "https://YOUR_RENDER_BACKEND_URL.onrender.com";
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [name, setName] = useState("");
   const [records, setRecords] = useState([]);
   const [total, setTotal] = useState(0);
-
-const [mealTypes] = useState([]);
+  const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-const fetchHistory = useCallback(async () => {
-  let url = `${API}/api/Meal/History?`;
+  const fetchHistory = useCallback(async () => {
+    let url = `${API}/api/Meal/History?`;
 
-  if (fromDate) url += `fromDate=${fromDate}&`;
-  if (toDate) url += `toDate=${toDate}&`;
-  if (name) url += `name=${name}&`;
-  if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
+    if (fromDate) url += `fromDate=${fromDate}&`;
+    if (toDate) url += `toDate=${toDate}&`;
+    if (name) url += `name=${name}&`;
+    if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
 
-  const res = await fetch(url);
-  const data = await res.json();
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      setRecords(data.records || []);
+      setTotal(data.totalAmount || 0);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+    }
+  }, [fromDate, toDate, name, selectedMealType]);
 
-  setRecords(data.records || []);
-  setTotal(data.totalAmount || 0);
-}, [fromDate, toDate, name, selectedMealType]);
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
-useEffect(() => {
-  fetchHistory();
-}, [fetchHistory]);
+  useEffect(() => {
+    fetch(`${API}/api/MealType/All`)
+      .then((res) => res.json())
+      .then((data) => setMealTypes(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="container">
