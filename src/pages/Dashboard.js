@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API = "https://YOUR_RENDER_BACKEND_URL.onrender.com"; 
+// 👆 yaha apna actual backend URL daalna
+
 function Dashboard() {
   const navigate = useNavigate();
   const employee = JSON.parse(localStorage.getItem("employee"));
@@ -16,20 +19,27 @@ function Dashboard() {
       return;
     }
 
-    fetch("https://your-render-url.onrender.com/api/MealType/All")
-      .then((res) => res.json())
-      .then((data) => setMealTypes(data));
+    loadData();
+  }, [navigate]);
 
-    fetch("https://your-render-url.onrender.com/api/Meal/TodayTotalPlates")
-      .then((res) => res.json())
-      .then((data) => setTotalPlates(data))
-      .catch(() => setTotalPlates(0));
+  const loadData = async () => {
+    try {
+      const mealRes = await fetch(`${API}/api/MealType/All`);
+      const mealData = await mealRes.json();
+      setMealTypes(mealData);
 
-    fetch("https://your-render-url.onrender.com/api/Meal/TodayTotalAmount")
-      .then((res) => res.json())
-      .then((data) => setTotalAmount(data))
-      .catch(() => setTotalAmount(0));
-  }, [navigate, employee]);
+      const platesRes = await fetch(`${API}/api/Meal/TodayTotalPlates`);
+      const platesData = await platesRes.json();
+      setTotalPlates(platesData);
+
+      const amountRes = await fetch(`${API}/api/Meal/TodayTotalAmount`);
+      const amountData = await amountRes.json();
+      setTotalAmount(amountData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+  };
+
   const addMeal = async () => {
     if (!selectedMeal) {
       alert("Select Meal First");
@@ -38,7 +48,7 @@ function Dashboard() {
 
     try {
       const checkRes = await fetch(
-        `https://your-render-url.onrender.com/api/Meal/CheckTodayMeal/${employee.employeeId}/${selectedMeal}`,
+        `${API}/api/Meal/CheckTodayMeal/${employee.employeeId}/${selectedMeal}`
       );
 
       const exists = await checkRes.json();
@@ -48,7 +58,7 @@ function Dashboard() {
         return;
       }
 
-      const response = await fetch("https://your-render-url.onrender.com/api/Meal/Add", {
+      const response = await fetch(`${API}/api/Meal/Add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,15 +74,7 @@ function Dashboard() {
       }
 
       alert("Meal Added Successfully");
-      const platesRes = await fetch(
-        "https://your-render-url.onrender.com/api/Meal/TodayTotalPlates",
-      );
-      setTotalPlates(await platesRes.json());
-
-      const amountRes = await fetch(
-        "https://your-render-url.onrender.com/api/Meal/TodayTotalAmount",
-      );
-      setTotalAmount(await amountRes.json());
+      loadData(); // refresh totals
     } catch (error) {
       console.error(error);
       alert("Server Error");
