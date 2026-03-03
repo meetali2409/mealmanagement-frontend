@@ -9,7 +9,7 @@ function History() {
   const [records, setRecords] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const [mealTypes, setMealTypes] = useState([]);
+const [mealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
 const fetchHistory = useCallback(async () => {
