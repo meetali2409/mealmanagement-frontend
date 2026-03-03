@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 function History() {
   const API = "https://your-render-url.onrender.com";
@@ -12,34 +12,24 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-  const fetchHistory = async () => {
-    let url = `${API}/api/Meal/History?`;
+const fetchHistory = useCallback(async () => {
+  let url = `${API}/api/Meal/History?`;
 
-    if (fromDate) url += `fromDate=${fromDate}&`;
-    if (toDate) url += `toDate=${toDate}&`;
-    if (name) url += `name=${name}&`;
-    if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
+  if (fromDate) url += `fromDate=${fromDate}&`;
+  if (toDate) url += `toDate=${toDate}&`;
+  if (name) url += `name=${name}&`;
+  if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
 
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
+  const res = await fetch(url);
+  const data = await res.json();
 
-      setRecords(data.records || []);
-      setTotal(data.totalAmount || 0);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to fetch history");
-    }
-  };
+  setRecords(data.records || []);
+  setTotal(data.totalAmount || 0);
+}, [fromDate, toDate, name, selectedMealType]);
 
-  useEffect(() => {
-    fetchHistory();
-
-    fetch(`${API}/api/MealType/All`)
-      .then((res) => res.json())
-      .then((data) => setMealTypes(data))
-      .catch(() => setMealTypes([]));
-  }, []);
+useEffect(() => {
+  fetchHistory();
+}, [fetchHistory]);
 
   return (
     <div className="container">

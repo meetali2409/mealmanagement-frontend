@@ -13,14 +13,14 @@ function Dashboard() {
   const [totalPlates, setTotalPlates] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  useEffect(() => {
-    if (!employee) {
-      navigate("/login");
-      return;
-    }
+useEffect(() => {
+  if (!employee) {
+    navigate("/login");
+    return;
+  }
 
-    loadData();
-  }, [navigate]);
+  loadData();
+}, [navigate, employee]);
 
   const loadData = async () => {
     try {
