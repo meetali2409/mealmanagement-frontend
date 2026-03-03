@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 
 function History() {
-  const API = "https://https://mealmanagement-backend.onrender.com.onrender.com";
+  const API = "https://mealmanagement-backend.onrender.com";
 
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
