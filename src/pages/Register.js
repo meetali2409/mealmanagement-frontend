@@ -15,46 +15,45 @@ function Register() {
     }
   }, [navigate]);
 
-const handleRegister = async () => {
-  if (!fullName.trim() || !password.trim()) {
-    alert("Name and Password required!");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const response = await fetch(
-      "https://mealmanagement-backend.onrender.com/api/Employee/Register",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          password: password.trim()
-        })
-      }
-    );
-
-    const text = await response.text();
-
-    if (!response.ok) {
-      alert("Error: " + text);
+  const handleRegister = async () => {
+    if (!fullName.trim() || !password.trim()) {
+      alert("Name and Password required!");
       return;
     }
 
-    alert("Registered Successfully 🎉");
-    navigate("/login");
+    try {
+      setLoading(true);
 
-  } catch (error) {
-    console.error(error);
-    alert("Network error: " + error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await fetch(
+        "https://mealmanagement-backend.onrender.com/api/Employee/Register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            password: password.trim()
+          })
+        }
+      );
+
+      const text = await response.text();
+
+      if (response.ok) {
+        alert(text || "Registered Successfully 🎉");
+        navigate("/login");
+      } else {
+        alert(text || "Registration failed");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("Backend waking up... please try again in a few seconds.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container">
