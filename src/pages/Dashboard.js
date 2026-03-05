@@ -25,7 +25,7 @@ function Dashboard() {
       if (retries === 0) throw error;
 
       console.log("Retrying request...");
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 20000));
 
       return fetchWithRetry(url, options, retries - 1);
     }
@@ -41,7 +41,7 @@ function Dashboard() {
 
     const interval = setInterval(() => {
       loadData();
-    }, 5000);
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [navigate, employee]);
@@ -73,39 +73,39 @@ function Dashboard() {
   };
 
   const addMeal = async () => {
-  if (!selectedMeal || !employee?.employeeId) {
-    alert("Select Meal First");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API}/api/Meal/Add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        employeeId: Number(employee.employeeId),
-        mealTypeId: Number(selectedMeal),
-      }),
-    });
-
-    const text = await response.text();
-
-    if (!response.ok) {
-      alert(text);
+    if (!selectedMeal || !employee?.employeeId) {
+      alert("Select Meal First");
       return;
     }
 
-    alert(text);
+    try {
+      const response = await fetch(`${API}/api/Meal/Add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: Number(employee.employeeId),
+          mealTypeId: Number(selectedMeal),
+        }),
+      });
 
-    setSelectedMeal(null);
-    loadData();
-  } catch (error) {
-    console.error(error);
-    alert("Server Error");
-  }
-};
+      const text = await response.text();
+
+      if (!response.ok) {
+        alert(text);
+        return;
+      }
+
+      alert(text);
+
+      setSelectedMeal(null);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Server Error");
+    }
+  };
 
   const openHistory = () => {
     const pass = prompt("Enter Admin Password");
@@ -140,15 +140,11 @@ function Dashboard() {
       >
         <option value="">Select Meal</option>
 
-        {loadingMeals ? (
-          <option disabled>Loading meals...</option>
-        ) : (
-          mealTypes.map((m) => (
-            <option key={m.mealTypeId} value={m.mealTypeId}>
-              {m.mealName} - ₹{m.fixedPrice}
-            </option>
-          ))
-        )}
+        {mealTypes.map((m) => (
+          <option key={m.id || m.mealTypeId} value={m.id || m.mealTypeId}>
+            {m.mealName} - ₹{m.fixedPrice}
+          </option>
+        ))}
       </select>
 
       <button onClick={addMeal} disabled={!selectedMeal}>
