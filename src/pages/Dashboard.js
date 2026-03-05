@@ -1,18 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API = "https://mealmanagement-backend.onrender.com";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const employee = JSON.parse(localStorage.getItem("employee"));
+  const employee = JSON.parse(localStorage.getItem("employee") || "null");
 
   const [mealTypes, setMealTypes] = useState([]);
   const [totalPlates, setTotalPlates] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loadingMeals, setLoadingMeals] = useState(true);
   const [selectedMeal, setSelectedMeal] = useState(null);
-  const fetchWithRetry = async (url, options = {}, retries = 2) => {
+
+  const fetchWithRetry = useCallback(async (url, options = {}, retries = 2) => {
     try {
       const res = await fetch(url, options);
 
@@ -29,18 +30,9 @@ function Dashboard() {
 
       return fetchWithRetry(url, options, retries - 1);
     }
-  };
+  }, []);
 
-useEffect(() => {
-  if (!employee) {
-    navigate("/login");
-    return;
-  }
-
-  loadData();
-}, [navigate, employee]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoadingMeals(true);
 
@@ -49,13 +41,13 @@ useEffect(() => {
       setMealTypes(mealData || []);
 
       const platesRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalPlates`,
+        `${API}/api/Meal/TodayTotalPlates`
       );
       const platesData = await platesRes.json();
       setTotalPlates(platesData);
 
       const amountRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalAmount`,
+        `${API}/api/Meal/TodayTotalAmount`
       );
       const amountData = await amountRes.json();
       setTotalAmount(amountData);
@@ -64,7 +56,16 @@ useEffect(() => {
     } catch (error) {
       console.error("Error loading data:", error);
     }
-  };
+  }, [fetchWithRetry]);
+
+  useEffect(() => {
+    if (!employee) {
+      navigate("/login");
+      return;
+    }
+
+    loadData();
+  }, [navigate, employee, loadData]);
 
   const addMeal = async () => {
     if (!selectedMeal || !employee?.employeeId) {
@@ -145,17 +146,23 @@ useEffect(() => {
         Add Meal
       </button>
 
-      <div className="summary-box">
-        <div className="summary-card">
-          <h4>Total Plates</h4>
-          <p>{totalPlates}</p>
-        </div>
+      {loadingMeals ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <div className="summary-box">
+            <div className="summary-card">
+              <h4>Total Plates</h4>
+              <p>{totalPlates}</p>
+            </div>
 
-        <div className="summary-card">
-          <h4>Total Amount</h4>
-          <p>₹{totalAmount}</p>
-        </div>
-      </div>
+            <div className="summary-card">
+              <h4>Total Amount</h4>
+              <p>₹{totalAmount}</p>
+            </div>
+          </div>
+        </>
+      )}
 
       <button onClick={logout}>Logout</button>
     </div>
