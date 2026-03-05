@@ -25,7 +25,7 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-        "https://your-render-url.onrender.com/api/Employee/Login",
+        "https://mealmanagement-backend.onrender.com/api/Employee/Login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

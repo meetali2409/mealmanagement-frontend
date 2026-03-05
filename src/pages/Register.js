@@ -25,7 +25,7 @@ function Register() {
       setLoading(true);
 
       const response = await fetch(
-        "https://your-render-url.onrender.com/api/Employee/Register",
+        "https://mealmanagement-backend.onrender.com/api/Employee/Register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
