@@ -4,16 +4,12 @@ padding:0;
 box-sizing:border-box;
 font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 }
-
 body{
 background:#0f1419;
 color:#e6edf3;
 min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:flex-start;
-padding:20px;
-overflow-x:hidden;
+margin:0;
+padding:0;
 }
 
 .container{
@@ -257,7 +253,7 @@ justify-content:center;
 @media (max-width:480px){
 
 body{
-padding:14px;
+padding:10px;
 overflow-x:hidden;
 }
 
@@ -266,12 +262,10 @@ width:100%;
 max-width:360px;
 margin:20px auto;
 padding:18px;
-border-radius:14px;
 }
 
 h2{
 font-size:20px;
-margin-bottom:18px;
 }
 
 h3{
