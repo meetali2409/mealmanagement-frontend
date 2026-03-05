@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://mealmanagement-backend.onrender.com"
+const API = "https://mealmanagement-backend.onrender.com";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,34 +11,70 @@ function Dashboard() {
   const [selectedMeal, setSelectedMeal] = useState("");
   const [totalPlates, setTotalPlates] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [loadingMeals, setLoadingMeals] = useState(true);
 
-useEffect(() => {
-  if (!employee) {
-    navigate("/login");
-    return;
-  }
+  // retry logic for Render sleeping server
+  const fetchWithRetry = async (url, options = {}, retries = 2) => {
+    try {
+      const res = await fetch(url, options);
 
-  loadData();
-}, [navigate, employee]);
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
 
-const loadData = async () => {
-  try {
-    const mealRes = await fetch(`${API}/api/MealType/All`);
-    const mealData = await mealRes.json();
-    console.log("Meal Types:", mealData);   
-    setMealTypes(mealData || []);
+      return res;
+    } catch (error) {
+      if (retries === 0) throw error;
 
-    const platesRes = await fetch(`${API}/api/Meal/TodayTotalPlates`);
-    const platesData = await platesRes.json();
-    setTotalPlates(platesData);
+      console.log("Retrying request...");
+      await new Promise((r) => setTimeout(r, 2000));
 
-    const amountRes = await fetch(`${API}/api/Meal/TodayTotalAmount`);
-    const amountData = await amountRes.json();
-    setTotalAmount(amountData);
-  } catch (error) {
-    console.error("Error loading data:", error);
-  }
-};
+      return fetchWithRetry(url, options, retries - 1);
+    }
+  };
+
+  useEffect(() => {
+    if (!employee) {
+      navigate("/login");
+      return;
+    }
+
+    loadData();
+
+    // auto refresh totals
+    const interval = setInterval(() => {
+      loadData();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [navigate, employee]);
+
+  const loadData = async () => {
+    try {
+      setLoadingMeals(true);
+
+      const mealRes = await fetchWithRetry(`${API}/api/MealType/All`);
+      const mealData = await mealRes.json();
+      setMealTypes(mealData || []);
+
+      const platesRes = await fetchWithRetry(
+        `${API}/api/Meal/TodayTotalPlates`
+      );
+      const platesData = await platesRes.json();
+      setTotalPlates(platesData);
+
+      const amountRes = await fetchWithRetry(
+        `${API}/api/Meal/TodayTotalAmount`
+      );
+      const amountData = await amountRes.json();
+      setTotalAmount(amountData);
+
+      setLoadingMeals(false);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+  };
+
   const addMeal = async () => {
     if (!selectedMeal) {
       alert("Select Meal First");
@@ -46,7 +82,7 @@ const loadData = async () => {
     }
 
     try {
-      const checkRes = await fetch(
+      const checkRes = await fetchWithRetry(
         `${API}/api/Meal/CheckTodayMeal/${employee.employeeId}/${selectedMeal}`
       );
 
@@ -57,9 +93,11 @@ const loadData = async () => {
         return;
       }
 
-      const response = await fetch(`${API}/api/Meal/Add`, {
+      const response = await fetchWithRetry(`${API}/api/Meal/Add`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           employeeId: employee.employeeId,
           mealTypeId: Number(selectedMeal),
@@ -73,15 +111,18 @@ const loadData = async () => {
       }
 
       alert("Meal Added Successfully");
+
+      setSelectedMeal("");
       loadData();
     } catch (error) {
       console.error(error);
-      alert("Server Error");
+      alert("Server Error. Please try again.");
     }
   };
 
   const openHistory = () => {
     const pass = prompt("Enter Admin Password");
+
     if (pass === "admin123") {
       navigate("/history");
     } else {
@@ -106,16 +147,26 @@ const loadData = async () => {
 
       <h3>Add Meal</h3>
 
-      <select value={selectedMeal} onChange={(e) => setSelectedMeal(Number(e.target.value))}>
+      <select
+        value={selectedMeal}
+        onChange={(e) => setSelectedMeal(Number(e.target.value))}
+      >
         <option value="">Select Meal</option>
-        {mealTypes.map((m) => (
-          <option key={m.mealTypeId} value={m.mealTypeId}>
-            {m.mealName} - ₹{m.fixedPrice}
-          </option>
-        ))}
+
+        {loadingMeals ? (
+          <option disabled>Loading meals...</option>
+        ) : (
+          mealTypes.map((m) => (
+            <option key={m.mealTypeId} value={m.mealTypeId}>
+              {m.mealName} - ₹{m.fixedPrice}
+            </option>
+          ))
+        )}
       </select>
 
-      <button onClick={addMeal}>Add Meal</button>
+      <button onClick={addMeal} disabled={!selectedMeal}>
+        Add Meal
+      </button>
 
       <div className="summary-box">
         <div className="summary-card">
