@@ -8,12 +8,10 @@ function Dashboard() {
   const employee = JSON.parse(localStorage.getItem("employee"));
 
   const [mealTypes, setMealTypes] = useState([]);
-  const [selectedMeal, setSelectedMeal] = useState("");
   const [totalPlates, setTotalPlates] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loadingMeals, setLoadingMeals] = useState(true);
-
-  // retry logic for Render sleeping server
+  const [selectedMeal, setSelectedMeal] = useState(null);
   const fetchWithRetry = async (url, options = {}, retries = 2) => {
     try {
       const res = await fetch(url, options);
@@ -41,7 +39,6 @@ function Dashboard() {
 
     loadData();
 
-    // auto refresh totals
     const interval = setInterval(() => {
       loadData();
     }, 5000);
@@ -58,13 +55,13 @@ function Dashboard() {
       setMealTypes(mealData || []);
 
       const platesRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalPlates`
+        `${API}/api/Meal/TodayTotalPlates`,
       );
       const platesData = await platesRes.json();
       setTotalPlates(platesData);
 
       const amountRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalAmount`
+        `${API}/api/Meal/TodayTotalAmount`,
       );
       const amountData = await amountRes.json();
       setTotalAmount(amountData);
@@ -76,49 +73,39 @@ function Dashboard() {
   };
 
   const addMeal = async () => {
-    if (!selectedMeal) {
-      alert("Select Meal First");
+  if (!selectedMeal || !employee?.employeeId) {
+    alert("Select Meal First");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API}/api/Meal/Add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employeeId: Number(employee.employeeId),
+        mealTypeId: Number(selectedMeal),
+      }),
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      alert(text);
       return;
     }
 
-    try {
-      const checkRes = await fetchWithRetry(
-        `${API}/api/Meal/CheckTodayMeal/${employee.employeeId}/${selectedMeal}`
-      );
+    alert(text);
 
-      const exists = await checkRes.json();
-
-      if (exists) {
-        alert("Meal already added today");
-        return;
-      }
-
-      const response = await fetchWithRetry(`${API}/api/Meal/Add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: employee.employeeId,
-          mealTypeId: Number(selectedMeal),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        alert(errorText);
-        return;
-      }
-
-      alert("Meal Added Successfully");
-
-      setSelectedMeal("");
-      loadData();
-    } catch (error) {
-      console.error(error);
-      alert("Server Error. Please try again.");
-    }
-  };
+    setSelectedMeal(null);
+    loadData();
+  } catch (error) {
+    console.error(error);
+    alert("Server Error");
+  }
+};
 
   const openHistory = () => {
     const pass = prompt("Enter Admin Password");
@@ -148,7 +135,7 @@ function Dashboard() {
       <h3>Add Meal</h3>
 
       <select
-        value={selectedMeal}
+        value={selectedMeal ?? ""}
         onChange={(e) => setSelectedMeal(Number(e.target.value))}
       >
         <option value="">Select Meal</option>
