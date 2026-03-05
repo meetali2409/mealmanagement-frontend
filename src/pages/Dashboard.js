@@ -12,7 +12,7 @@ function Dashboard() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [loadingMeals, setLoadingMeals] = useState(true);
-
+  const [addingMeal, setAddingMeal] = useState(false);
   const fetchWithRetry = async (url, options = {}, retries = 2) => {
     try {
       const res = await fetch(url, options);
@@ -33,11 +33,15 @@ function Dashboard() {
       const mealData = await mealRes.json();
       setMealTypes(mealData || []);
 
-      const platesRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalPlates`);
+      const platesRes = await fetchWithRetry(
+        `${API}/api/Meal/TodayTotalPlates`,
+      );
       const platesData = await platesRes.json();
       setTotalPlates(platesData);
 
-      const amountRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalAmount`);
+      const amountRes = await fetchWithRetry(
+        `${API}/api/Meal/TodayTotalAmount`,
+      );
       const amountData = await amountRes.json();
       setTotalAmount(amountData);
 
@@ -63,7 +67,11 @@ function Dashboard() {
       return;
     }
 
+    if (addingMeal) return;
+
     try {
+      setAddingMeal(true);
+
       const response = await fetch(`${API}/api/Meal/Add`, {
         method: "POST",
         headers: {
@@ -79,18 +87,21 @@ function Dashboard() {
 
       if (!response.ok) {
         alert(text);
+        setAddingMeal(false);
         return;
       }
 
       alert(text);
+
       setSelectedMeal(null);
       loadData();
     } catch (error) {
       console.error(error);
       alert("Server Error");
+    } finally {
+      setAddingMeal(false);
     }
   };
-
   const openHistory = () => {
     const pass = prompt("Enter Admin Password");
     if (pass === "admin123") navigate("/history");
@@ -104,51 +115,51 @@ function Dashboard() {
 
   return (
     <div className="container">
-  <h2>Welcome {employee?.fullName}</h2>
+      <h2>Welcome {employee?.fullName}</h2>
 
-  <div className="top-bar">
-    <button className="secondary" onClick={openHistory}>
-      View Records
-    </button>
-  </div>
+      <div className="top-bar">
+        <button className="secondary" onClick={openHistory}>
+          View Records
+        </button>
+      </div>
 
-  <h3>Add Meal</h3>
+      <h3>Add Meal</h3>
 
-  <select
-    value={selectedMeal ?? ""}
-    onChange={(e) => setSelectedMeal(Number(e.target.value))}
-  >
-    <option value="">Select Meal</option>
+      <select
+        value={selectedMeal ?? ""}
+        onChange={(e) => setSelectedMeal(Number(e.target.value))}
+      >
+        <option value="">Select Meal</option>
 
-    {mealTypes.map((m) => (
-      <option key={m.id || m.mealTypeId} value={m.id || m.mealTypeId}>
-        {m.mealName} - ₹{m.fixedPrice}
-      </option>
-    ))}
-  </select>
+        {mealTypes.map((m) => (
+          <option key={m.id || m.mealTypeId} value={m.id || m.mealTypeId}>
+            {m.mealName} - ₹{m.fixedPrice}
+          </option>
+        ))}
+      </select>
 
-  <button className="primary" onClick={addMeal} disabled={!selectedMeal}>
-    Add Meal
-  </button>
+      <button onClick={addMeal} disabled={!selectedMeal || addingMeal}>
+        {addingMeal ? "Adding..." : "Add Meal"}
+      </button>
 
-  {loadingMeals && <p>Loading...</p>}
+      {loadingMeals && <p>Loading...</p>}
 
-  <div className="summary-box">
-    <div className="summary-card">
-      <h4>Total Plates</h4>
-      <p>{totalPlates}</p>
+      <div className="summary-box">
+        <div className="summary-card">
+          <h4>Total Plates</h4>
+          <p>{totalPlates}</p>
+        </div>
+
+        <div className="summary-card">
+          <h4>Total Amount</h4>
+          <p>₹{totalAmount}</p>
+        </div>
+      </div>
+
+      <button className="accent" onClick={logout}>
+        Logout
+      </button>
     </div>
-
-    <div className="summary-card">
-      <h4>Total Amount</h4>
-      <p>₹{totalAmount}</p>
-    </div>
-  </div>
-
-  <button className="accent" onClick={logout}>
-    Logout
-  </button>
-</div>
   );
 }
 
