@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://mealmanagement-backend.onrender.com"; 
-// 👆 yaha apna actual backend URL daalna
+const API = "https://mealmanagement-backend.onrender.com"
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -22,24 +21,24 @@ useEffect(() => {
   loadData();
 }, [navigate, employee]);
 
-  const loadData = async () => {
-    try {
-      const mealRes = await fetch(`${API}/api/MealType/All`);
-      const mealData = await mealRes.json();
-      setMealTypes(mealData);
+const loadData = async () => {
+  try {
+    const mealRes = await fetch(`${API}/api/MealType/All`);
+    const mealData = await mealRes.json();
+    console.log("Meal Types:", mealData);   
+    setMealTypes(mealData || []);
 
-      const platesRes = await fetch(`${API}/api/Meal/TodayTotalPlates`);
-      const platesData = await platesRes.json();
-      setTotalPlates(platesData);
+    const platesRes = await fetch(`${API}/api/Meal/TodayTotalPlates`);
+    const platesData = await platesRes.json();
+    setTotalPlates(platesData);
 
-      const amountRes = await fetch(`${API}/api/Meal/TodayTotalAmount`);
-      const amountData = await amountRes.json();
-      setTotalAmount(amountData);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-  };
-
+    const amountRes = await fetch(`${API}/api/Meal/TodayTotalAmount`);
+    const amountData = await amountRes.json();
+    setTotalAmount(amountData);
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
+};
   const addMeal = async () => {
     if (!selectedMeal) {
       alert("Select Meal First");
@@ -74,7 +73,7 @@ useEffect(() => {
       }
 
       alert("Meal Added Successfully");
-      loadData(); // refresh totals
+      loadData();
     } catch (error) {
       console.error(error);
       alert("Server Error");
@@ -107,7 +106,7 @@ useEffect(() => {
 
       <h3>Add Meal</h3>
 
-      <select onChange={(e) => setSelectedMeal(Number(e.target.value))}>
+      <select value={selectedMeal} onChange={(e) => setSelectedMeal(Number(e.target.value))}>
         <option value="">Select Meal</option>
         {mealTypes.map((m) => (
           <option key={m.mealTypeId} value={m.mealTypeId}>
