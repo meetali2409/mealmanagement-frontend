@@ -31,20 +31,14 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    if (!employee) {
-      navigate("/login");
-      return;
-    }
+useEffect(() => {
+  if (!employee) {
+    navigate("/login");
+    return;
+  }
 
-    loadData();
-
-    const interval = setInterval(() => {
-      loadData();
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [navigate, employee]);
+  loadData();
+}, [navigate, employee]);
 
   const loadData = async () => {
     try {
