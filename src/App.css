@@ -255,6 +255,7 @@ justify-content:center;
 body{
 padding:10px;
 overflow-x:hidden;
+background-color: white;
 }
 
 .container{
