@@ -15,7 +15,7 @@ function Register() {
     }
   }, [navigate]);
 
- const handleRegister = async () => {
+const handleRegister = async () => {
   if (!fullName.trim() || !password.trim()) {
     alert("Name and Password required!");
     return;
@@ -38,9 +38,10 @@ function Register() {
       }
     );
 
+    const text = await response.text();
+
     if (!response.ok) {
-      const error = await response.text();
-      alert(error);
+      alert("Error: " + text);
       return;
     }
 
@@ -48,7 +49,8 @@ function Register() {
     navigate("/login");
 
   } catch (error) {
-    alert("Server Error. Try Again.");
+    console.error(error);
+    alert("Network error: " + error.message);
   } finally {
     setLoading(false);
   }
