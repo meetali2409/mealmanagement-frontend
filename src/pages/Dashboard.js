@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://YOUR_RENDER_BACKEND_URL.onrender.com"; 
+const API = "https://mealmanagement-backend.onrender.com"; 
 // 👆 yaha apna actual backend URL daalna
 
 function Dashboard() {
