@@ -5,25 +5,25 @@
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* 🌙 Dark Background */
 body {
   background: #0f1419;
   color: #e6edf3;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;  
+  padding: 20px;            
 }
 
-/* 🌙 Main Card */
+
 .container {
-  width: 1000px;
-  max-width: 95%;
+  width: 100%;
+  max-width: 900px;          
   margin: 40px auto;
   padding: 35px;
   background: #161b22;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   border-top: 6px solid #1fba7a;
 }
 
@@ -49,6 +49,7 @@ h3 {
 .container input{
   margin-bottom: 20px !important;
 }
+
 input,
 select {
   width: 100%;
@@ -65,7 +66,7 @@ input:focus,
 select:focus {
   outline: none;
   border-color: #1fba7a;
-  box-shadow: 0 0 0 3px rgba(31, 186, 122, 0.2);
+  box-shadow: 0 0 0 3px rgba(31,186,122,0.2);
 }
 
 button {
@@ -77,6 +78,7 @@ button {
   cursor: pointer;
   transition: 0.2s ease;
   margin-top: 20px;
+  width: 100%;
 }
 
 button.primary {
@@ -105,17 +107,20 @@ button.accent {
 button.accent:hover {
   background: #c73b3b;
 }
+
 .top-bar {
   display: flex;
-  justify-content: flex-end;   
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .top-bar button {
-  width: auto;      
-  margin-top: 0;    
+  width: auto;
+  margin-top: 0;
 }
+
 .add-meal-section {
   background: #11161c;
   padding: 20px;
@@ -124,14 +129,20 @@ button.accent:hover {
   margin-bottom: 25px;
 }
 
+.summary-box {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
 .summary-card {
   margin-top: 20px !important;
-  flex: 1;
+  flex: 1 1 200px;
   padding: 20px;
   background: #11161c;
   border-radius: 14px;
   border-left: 5px solid #1fba7a;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .summary-card h4 {
@@ -150,7 +161,7 @@ button.accent:hover {
   margin-top: 20px;
   overflow-x: auto;
   border-radius: 14px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
 }
 
 table {
@@ -185,7 +196,7 @@ tbody tr:hover {
   background: #1b242c;
 }
 
-/* 🌙 Auth Link */
+
 .auth-link {
   margin-top: 15px;
   text-align: center;
@@ -203,26 +214,48 @@ tbody tr:hover {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width:768px) {
+
   .container {
     padding: 22px;
-    margin: 25px auto;
+    margin: 20px auto;
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 22px;
+  }
+
+  h3{
+    font-size:18px;
+  }
+
+  .summary-box{
+    flex-direction: column;
   }
 
   th, td {
     font-size: 12px;
     padding: 8px;
   }
-  
+
   .top-bar {
-    justify-content: flex-end; /* mobile me bhi right */
+    justify-content: flex-end;
   }
 
-  .top-bar button {
-    width: auto;
+}
+
+@media (max-width:480px){
+
+  .container{
+    padding:18px;
   }
+
+  h2{
+    font-size:20px;
+  }
+
+  input,select{
+    padding:10px;
+  }
+
 }
