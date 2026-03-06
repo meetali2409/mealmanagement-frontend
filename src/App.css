@@ -85,28 +85,34 @@ button.primary {
   background: #1fba7a;
   color: #fff;
 }
-
+button.secondary{
+  background: #1fba7a;
+  color: #fff;
+}
 button.primary:hover button.secondary {
   background: #2ea97c;
   color: #fff;
 }
-
+button.accent{
+  background: #e54848;
+  color: #fff; 
+}
 button.secondary:hover button.accent {
   background: #e54848;
   color: #fff;
 }
 
-button.accent:hover .top-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+.top-bar{
+display:flex;
+justify-content:flex-end;
+/* align-items:center; */
+margin-bottom:20px;
 }
 
-.top-bar button {
-  width: auto;
-  margin-top: 0;
+.top-bar button{
+width:auto;
+margin-top:0;
+margin-right: 0;
 }
 
 .add-meal-section {
@@ -250,9 +256,9 @@ tbody tr:hover .auth-link {
   }
   .container {
     width: 100%;
-    max-width: 360px;
-    margin: 20px auto;
-    padding: 18px;
+    /* max-width: 900px; */
+    margin: 10px auto;
+    /* padding: 18px; */
   }
   h2 {
     font-size: 20px;
@@ -269,13 +275,24 @@ tbody tr:hover .auth-link {
     padding: 10px;
     font-size: 14px;
   }
-  .summary-box {
-    flex-direction: column;
-    gap: 14px;
-  }
-  .summary-card {
-    padding: 14px;
-  }
+.summary-box{
+gap:10px;
+}
+
+.summary-card{
+flex:1 1 120px;
+padding:10px;
+max-height:60px;
+}
+
+.summary-card h4{
+font-size:12px;
+margin-bottom:4px;
+}
+
+.summary-card p{
+font-size:16px;
+}
   table {
     min-width: 500px;
   }

@@ -61,47 +61,46 @@ function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, employee]);
 
-  const addMeal = async () => {
-    if (!selectedMeal || !employee?.employeeId) {
-      alert("Select Meal First");
+const addMeal = async () => {
+  if (!selectedMeal || !employee?.employeeId) {
+    alert("Select Meal First");
+    return;
+  }
+
+  if (addingMeal) return;
+
+  try {
+    setAddingMeal(true);
+
+    const response = await fetch(`${API}/api/Meal/Add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employeeId: Number(employee.employeeId),
+        mealTypeId: Number(selectedMeal),
+      }),
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      alert(text);
       return;
     }
 
-    if (addingMeal) return;
+    alert(text);
+    setSelectedMeal(null);
+    loadData();
 
-    try {
-      setAddingMeal(true);
-
-      const response = await fetch(`${API}/api/Meal/Add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: Number(employee.employeeId),
-          mealTypeId: Number(selectedMeal),
-        }),
-      });
-
-      const text = await response.text();
-
-      if (!response.ok) {
-        alert(text);
-        setAddingMeal(false);
-        return;
-      }
-
-      alert(text);
-
-      setSelectedMeal(null);
-      loadData();
-    } catch (error) {
-      console.error(error);
-      alert("Server Error");
-    } finally {
-      setAddingMeal(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Server Error");
+  } finally {
+    setAddingMeal(false);
+  }
+};
   const openHistory = () => {
     const pass = prompt("Enter Admin Password");
     if (pass === "admin123") navigate("/history");
@@ -138,7 +137,7 @@ function Dashboard() {
         ))}
       </select>
 
-      <button onClick={addMeal} disabled={!selectedMeal || addingMeal}>
+      <button className="primary" onClick={addMeal} disabled={!selectedMeal || addingMeal}>
         {addingMeal ? "Adding..." : "Add Meal"}
       </button>
 
