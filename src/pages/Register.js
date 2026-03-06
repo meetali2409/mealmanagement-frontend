@@ -5,7 +5,7 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,13 +29,13 @@ function Register() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             fullName: fullName.trim(),
-            password: password.trim()
-          })
-        }
+            password: password.trim(),
+          }),
+        },
       );
 
       const text = await response.text();
@@ -46,7 +46,6 @@ function Register() {
       } else {
         alert(text || "Registration failed");
       }
-
     } catch (error) {
       console.error(error);
       alert("Backend waking up... please try again in a few seconds.");
@@ -71,12 +70,21 @@ function Register() {
           onChange={(e) => setFullName(e.target.value)}
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="password-field">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <span
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </span>
+        </div>
 
         <button type="submit" className="primary" disabled={loading}>
           {loading ? "Registering..." : "Register"}

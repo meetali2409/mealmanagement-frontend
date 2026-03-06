@@ -13,6 +13,10 @@ function Dashboard() {
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [loadingMeals, setLoadingMeals] = useState(true);
   const [addingMeal, setAddingMeal] = useState(false);
+
+  const [showAdminBox, setShowAdminBox] = useState(false);
+  const [adminPass, setAdminPass] = useState("");
+
   const fetchWithRetry = async (url, options = {}, retries = 2) => {
     try {
       const res = await fetch(url, options);
@@ -33,15 +37,11 @@ function Dashboard() {
       const mealData = await mealRes.json();
       setMealTypes(mealData || []);
 
-      const platesRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalPlates`,
-      );
+      const platesRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalPlates`);
       const platesData = await platesRes.json();
       setTotalPlates(platesData);
 
-      const amountRes = await fetchWithRetry(
-        `${API}/api/Meal/TodayTotalAmount`,
-      );
+      const amountRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalAmount`);
       const amountData = await amountRes.json();
       setTotalAmount(amountData);
 
@@ -61,50 +61,56 @@ function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, employee]);
 
-const addMeal = async () => {
-  if (!selectedMeal || !employee?.employeeId) {
-    alert("Select Meal First");
-    return;
-  }
-
-  if (addingMeal) return;
-
-  try {
-    setAddingMeal(true);
-
-    const response = await fetch(`${API}/api/Meal/Add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        employeeId: Number(employee.employeeId),
-        mealTypeId: Number(selectedMeal),
-      }),
-    });
-
-    const text = await response.text();
-
-    if (!response.ok) {
-      alert(text);
+  const addMeal = async () => {
+    if (!selectedMeal || !employee?.employeeId) {
+      alert("Select Meal First");
       return;
     }
 
-    alert(text);
-    setSelectedMeal(null);
-    loadData();
+    if (addingMeal) return;
 
-  } catch (error) {
-    console.error(error);
-    alert("Server Error");
-  } finally {
-    setAddingMeal(false);
-  }
-};
+    try {
+      setAddingMeal(true);
+
+      const response = await fetch(`${API}/api/Meal/Add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: Number(employee.employeeId),
+          mealTypeId: Number(selectedMeal),
+        }),
+      });
+
+      const text = await response.text();
+
+      if (!response.ok) {
+        alert(text);
+        return;
+      }
+
+      alert(text);
+      setSelectedMeal(null);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Server Error");
+    } finally {
+      setAddingMeal(false);
+    }
+  };
+
   const openHistory = () => {
-    const pass = prompt("Enter Admin Password");
-    if (pass === "admin123") navigate("/history");
-    else alert("Wrong Password");
+    setShowAdminBox(true);
+  };
+
+  const checkAdminPassword = () => {
+    if (adminPass === "admin123") {
+      navigate("/history");
+    } else {
+      alert("Wrong Password");
+    }
   };
 
   const logout = () => {
@@ -116,11 +122,30 @@ const addMeal = async () => {
     <div className="container">
       <h2>Welcome {employee?.fullName}</h2>
 
-      <div className="top-bar">
-        <button className="secondary" onClick={openHistory}>
-          View Records
-        </button>
-      </div>
+     <div className="top-bar">
+
+  {!showAdminBox && (
+    <button className="secondary" onClick={() => setShowAdminBox(true)}>
+      View Records
+    </button>
+  )}
+
+  {showAdminBox && (
+    <div className="admin-login">
+      <input
+        type="password"
+        placeholder="Admin Password"
+        value={adminPass}
+        onChange={(e) => setAdminPass(e.target.value)}
+      />
+
+      <button className="secondary" onClick={checkAdminPassword}>
+        Go
+      </button>
+    </div>
+  )}
+
+</div>
 
       <h3>Add Meal</h3>
 
@@ -137,7 +162,11 @@ const addMeal = async () => {
         ))}
       </select>
 
-      <button className="primary" onClick={addMeal} disabled={!selectedMeal || addingMeal}>
+      <button
+        className="primary"
+        onClick={addMeal}
+        disabled={!selectedMeal || addingMeal}
+      >
         {addingMeal ? "Adding..." : "Add Meal"}
       </button>
 

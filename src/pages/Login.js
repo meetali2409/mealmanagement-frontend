@@ -5,7 +5,7 @@ function Login() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ function Login() {
             fullName: fullName.trim(),
             password: password.trim(),
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -68,12 +68,21 @@ function Login() {
           onChange={(e) => setFullName(e.target.value)}
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="password-field">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <span
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </span>
+        </div>
 
         <button type="submit" className="primary" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
