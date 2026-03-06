@@ -125,9 +125,9 @@ function Dashboard() {
      <div className="top-bar">
 
   {!showAdminBox && (
-    <button className="secondary" onClick={() => setShowAdminBox(true)}>
-      View Records
-    </button>
+   <button className="secondary" onClick={openHistory}>
+  View Records
+</button>
   )}
 
   {showAdminBox && (
