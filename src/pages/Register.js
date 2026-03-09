@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 function Register() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -16,43 +17,44 @@ function Register() {
   }, [navigate]);
 
   const handleRegister = async () => {
-    if (!fullName.trim() || !password.trim()) {
-      alert("Name and Password required!");
-      return;
-    }
+  if (!fullName.trim() || !password.trim() || !email.trim()) {
+    alert("Name, Email and Password required!");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetch(
-        "https://mealmanagement-backend.onrender.com/api/Employee/Register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fullName: fullName.trim(),
-            password: password.trim(),
-          }),
+    const response = await fetch(
+      "https://mealmanagement-backend.onrender.com/api/Employee/Register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-
-      const text = await response.text();
-
-      if (response.ok) {
-        alert(text || "Registered Successfully 🎉");
-        navigate("/login");
-      } else {
-        alert(text || "Registration failed");
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          password: password.trim(),
+          email: email.trim(),
+        }),
       }
-    } catch (error) {
-      console.error(error);
-      alert("Backend waking up... please try again in a few seconds.");
-    } finally {
-      setLoading(false);
+    );
+
+    const text = await response.text();
+
+    if (response.ok) {
+      alert(text || "Registered Successfully 🎉");
+      navigate("/login");
+    } else {
+      alert(text || "Registration failed");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Backend waking up... please try again in a few seconds.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container">
@@ -63,7 +65,11 @@ function Register() {
         }}
       >
         <h2>Create Account</h2>
-
+        <input
+          type="email"
+          placeholder="Enter Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <input
           placeholder="Full Name"
           value={fullName}
