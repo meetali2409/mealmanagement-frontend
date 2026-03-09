@@ -45,27 +45,50 @@ function History() {
       <h2>Meal History</h2>
 
       <div className="filter-section">
+
         <div className="filter-group">
           <label>From Date</label>
-          <input type="date" onChange={(e) => setFromDate(e.target.value)} />
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              fetchHistory();
+            }}
+          />
         </div>
 
         <div className="filter-group">
           <label>To Date</label>
-          <input type="date" onChange={(e) => setToDate(e.target.value)} />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              fetchHistory();
+            }}
+          />
         </div>
 
         <div className="filter-group">
           <label>Employee Name</label>
           <input
             placeholder="Enter Name"
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              fetchHistory();
+            }}
           />
         </div>
 
         <div className="filter-group">
           <label>Meal Type</label>
-          <select onChange={(e) => setSelectedMealType(e.target.value)}>
+          <select
+            onChange={(e) => {
+              setSelectedMealType(e.target.value);
+              fetchHistory();
+            }}
+          >
             <option value="">All Meals</option>
             {mealTypes.map((m) => (
               <option key={m.mealTypeId} value={m.mealTypeId}>
@@ -74,6 +97,7 @@ function History() {
             ))}
           </select>
         </div>
+
       </div>
 
       <div className="filter-button">
