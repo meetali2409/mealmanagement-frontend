@@ -30,10 +30,6 @@ function History() {
   }, [fromDate, toDate, name, selectedMealType]);
 
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
-
-  useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
       .then((data) => setMealTypes(data))
@@ -51,10 +47,7 @@ function History() {
           <input
             type="date"
             value={fromDate}
-            onChange={(e) => {
-              setFromDate(e.target.value);
-              fetchHistory();
-            }}
+            onChange={(e) => setFromDate(e.target.value)}
           />
         </div>
 
@@ -63,10 +56,7 @@ function History() {
           <input
             type="date"
             value={toDate}
-            onChange={(e) => {
-              setToDate(e.target.value);
-              fetchHistory();
-            }}
+            onChange={(e) => setToDate(e.target.value)}
           />
         </div>
 
@@ -74,20 +64,16 @@ function History() {
           <label>Employee Name</label>
           <input
             placeholder="Enter Name"
-            onChange={(e) => {
-              setName(e.target.value);
-              fetchHistory();
-            }}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
         <div className="filter-group">
           <label>Meal Type</label>
           <select
-            onChange={(e) => {
-              setSelectedMealType(e.target.value);
-              fetchHistory();
-            }}
+            value={selectedMealType}
+            onChange={(e) => setSelectedMealType(e.target.value)}
           >
             <option value="">All Meals</option>
             {mealTypes.map((m) => (
