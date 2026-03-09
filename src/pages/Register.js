@@ -9,55 +9,70 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-useEffect(() => {
-  const user = localStorage.getItem("employee");
-  if (user) {
-    navigate("/dashboard");
-  }
-  fetch("https://mealmanagement-backend.onrender.com/api/Meal/TodayTotalPlates")
-    .catch(() => {});
-    
-}, [navigate]);
+  useEffect(() => {
+    const user = localStorage.getItem("employee");
+    if (user) {
+      navigate("/dashboard");
+    }
+
+    // Wake backend when page loads
+    fetch("https://mealmanagement-backend.onrender.com/api/Meal/TodayTotalPlates")
+      .catch(() => {});
+  }, [navigate]);
+
+  // Retry function if backend sleeping
+  const fetchWithRetry = async (url, options, retries = 3) => {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise((r) => setTimeout(r, 5000));
+        return fetchWithRetry(url, options, retries - 1);
+      }
+      throw err;
+    }
+  };
 
   const handleRegister = async () => {
-  if (!fullName.trim() || !password.trim() || !email.trim()) {
-    alert("Name, Email and Password required!");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const response = await fetch(
-      "https://mealmanagement-backend.onrender.com/api/Employee/Register",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          password: password.trim(),
-          email: email.trim(),
-        }),
-      }
-    );
-
-    const text = await response.text();
-
-    if (response.ok) {
-      alert(text || "Registered Successfully 🎉");
-      navigate("/login");
-    } else {
-      alert(text || "Registration failed");
+    if (!fullName.trim() || !password.trim() || !email.trim()) {
+      alert("Name, Email and Password required!");
+      return;
     }
-  } catch (error) {
-    console.error(error);
-    alert("Backend waking up... please try again in a few seconds.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    try {
+      setLoading(true);
+
+      const response = await fetchWithRetry(
+        "https://mealmanagement-backend.onrender.com/api/Employee/Register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            password: password.trim(),
+            email: email.trim(),
+          }),
+        }
+      );
+
+      const text = await response.text();
+
+      if (response.ok) {
+        alert(text || "Registered Successfully 🎉");
+        navigate("/login");
+      } else {
+        alert(text || "Registration failed");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server starting... please wait 30 seconds and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container">
@@ -68,11 +83,14 @@ useEffect(() => {
         }}
       >
         <h2>Create Account</h2>
+
         <input
           type="email"
           placeholder="Enter Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+
         <input
           placeholder="Full Name"
           value={fullName}
