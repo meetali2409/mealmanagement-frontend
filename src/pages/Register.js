@@ -14,13 +14,10 @@ function Register() {
     if (user) {
       navigate("/dashboard");
     }
-
-    // Wake backend when page loads
     fetch("https://mealmanagement-backend.onrender.com/api/Meal/TodayTotalPlates")
       .catch(() => {});
   }, [navigate]);
 
-  // Retry function if backend sleeping
   const fetchWithRetry = async (url, options, retries = 3) => {
     try {
       const res = await fetch(url, options);
@@ -34,45 +31,49 @@ function Register() {
     }
   };
 
-  const handleRegister = async () => {
-    if (!fullName.trim() || !password.trim() || !email.trim()) {
-      alert("Name, Email and Password required!");
-      return;
-    }
+const handleRegister = async () => {
+  if (!fullName.trim() || !password.trim() || !email.trim()) {
+    alert("Name, Email and Password required!");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetchWithRetry(
-        "https://mealmanagement-backend.onrender.com/api/Employee/Register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fullName: fullName.trim(),
-            password: password.trim(),
-            email: email.trim(),
-          }),
-        }
-      );
+    await fetch(
+      "https://mealmanagement-backend.onrender.com/api/Meal/TodayTotalPlates"
+    ).catch(() => {});
 
-      const text = await response.text();
-
-      if (response.ok) {
-        alert(text || "Registered Successfully 🎉");
-        navigate("/login");
-      } else {
-        alert(text || "Registration failed");
+    const response = await fetch(
+      "https://mealmanagement-backend.onrender.com/api/Employee/Register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          password: password.trim(),
+          email: email.trim(),
+        }),
       }
-    } catch (error) {
-      console.error(error);
-      alert("Server starting... please wait 30 seconds and try again.");
-    } finally {
-      setLoading(false);
+    );
+
+    const text = await response.text();
+
+    if (response.ok) {
+      alert(text || "Registered Successfully 🎉");
+      navigate("/login");
+    } else {
+      alert(text || "Registration failed");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Server starting... please wait 30 seconds and try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container">
@@ -125,4 +126,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Register; 
