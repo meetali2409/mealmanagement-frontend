@@ -9,12 +9,15 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const user = localStorage.getItem("employee");
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+useEffect(() => {
+  const user = localStorage.getItem("employee");
+  if (user) {
+    navigate("/dashboard");
+  }
+  fetch("https://mealmanagement-backend.onrender.com/api/Meal/TodayTotalPlates")
+    .catch(() => {});
+    
+}, [navigate]);
 
   const handleRegister = async () => {
   if (!fullName.trim() || !password.trim() || !email.trim()) {
