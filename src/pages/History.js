@@ -50,7 +50,7 @@ function History() {
   }, [fromDate, toDate, name, selectedMealType, fetchHistory]);
 
   return (
-    <div className="container">
+    <div className="containers">
       <h2>Meal History</h2>
 
       <div className="filter-section">
