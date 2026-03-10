@@ -329,3 +329,11 @@ tbody tr:nth-child(even) {
     min-width: 500px;
   }
 }
+input[type="date"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+}
