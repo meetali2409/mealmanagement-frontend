@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function History() {
   const API = "https://mealmanagement-backend-production.up.railway.app";
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
   const [name, setName] = useState("");
   const [records, setRecords] = useState([]);
   const [total, setTotal] = useState(0);
@@ -14,8 +16,16 @@ function History() {
   const fetchHistory = useCallback(async () => {
     let url = `${API}/api/Meal/History?`;
 
-    if (fromDate) url += `fromDate=${fromDate}&`;
-    if (toDate) url += `toDate=${toDate}&`;
+    if (fromDate) {
+      const f = fromDate.toISOString().split("T")[0];
+      url += `fromDate=${f}&`;
+    }
+
+    if (toDate) {
+      const t = toDate.toISOString().split("T")[0];
+      url += `toDate=${t}&`;
+    }
+
     if (name) url += `name=${name}&`;
     if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
 
@@ -41,29 +51,26 @@ function History() {
       <h2>Meal History</h2>
 
       <div className="filter-section">
+
         <div className="filter-group">
           <label>From Date</label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            style={{
-              colorScheme: "dark",
-              WebkitAppearance: "auto",
-            }}
+          <DatePicker
+            selected={fromDate}
+            onChange={(date) => setFromDate(date)}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Select From Date"
+            className="date-input"
           />
         </div>
 
         <div className="filter-group">
           <label>To Date</label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setToDate(e.target.value)}
-            style={{
-              colorScheme: "dark",
-              WebkitAppearance: "auto",
-            }}
+          <DatePicker
+            selected={toDate}
+            onChange={(date) => setToDate(date)}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Select To Date"
+            className="date-input"
           />
         </div>
 
@@ -90,6 +97,7 @@ function History() {
             ))}
           </select>
         </div>
+
       </div>
 
       <div className="filter-button">
