@@ -59,7 +59,7 @@ function History() {
           <input
             type="date"
             value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
+            onChange={(e) => setToDate(e.target.value)}
             style={{
               colorScheme: "dark",
               WebkitAppearance: "auto",
