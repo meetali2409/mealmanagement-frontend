@@ -334,6 +334,6 @@ input[type="date"] {
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
   filter: invert(1);
+  cursor: pointer;
 }

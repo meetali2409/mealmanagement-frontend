@@ -41,13 +41,16 @@ function History() {
       <h2>Meal History</h2>
 
       <div className="filter-section">
-
         <div className="filter-group">
           <label>From Date</label>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
+            style={{
+              colorScheme: "dark",
+              WebkitAppearance: "auto",
+            }}
           />
         </div>
 
@@ -55,8 +58,12 @@ function History() {
           <label>To Date</label>
           <input
             type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            style={{
+              colorScheme: "dark",
+              WebkitAppearance: "auto",
+            }}
           />
         </div>
 
@@ -83,7 +90,6 @@ function History() {
             ))}
           </select>
         </div>
-
       </div>
 
       <div className="filter-button">

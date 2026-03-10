@@ -169,7 +169,7 @@ function Dashboard() {
         {addingMeal ? "Adding..." : "Add Meal"}
       </button>
 
-      {loadingMeals && <p>Loading...</p>}
+      {loadingMeals && <p></p>}
 
       <div className="summary-box">
         <div className="summary-card">
