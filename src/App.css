@@ -10,13 +10,17 @@
 }
 
 body {
-  background: #0f1419;
-  color: #e6edf3;
-  min-height: 100vh;
-  padding: 20px;
-}
+body{
+  background:#0f1419;
+  color:#e6edf3;
+  min-height:100vh;
 
-/* container */
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:20px;
+}
+}
 
 .container {
   width: 100%;
@@ -29,7 +33,6 @@ body {
   border-top: 6px solid #1fba7a;
 }
 
-/* login container */
 
 .container form {
   display: flex;
@@ -267,6 +270,13 @@ tbody tr:nth-child(even) {
 /* mobile */
 
 @media (max-width: 768px) {
+body{
+  align-items:flex-start;
+}
+
+.container{
+  margin-top:20px;
+}
 
 body {
   padding: 15px;
