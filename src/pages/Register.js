@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
+const API = "https://mealmanagement-backend-production.up.railway.app";
+
 function Register() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
@@ -14,40 +16,18 @@ function Register() {
     if (user) {
       navigate("/dashboard");
     }
-    fetch("https://mealmanagement-backend-production.up.railway.app/api/Meal/TodayTotalPlates")
-
-      .catch(() => {});
   }, [navigate]);
 
-  const fetchWithRetry = async (url, options, retries = 3) => {
-    try {
-      const res = await fetch(url, options);
-      return res;
-    } catch (err) {
-      if (retries > 0) {
-        await new Promise((r) => setTimeout(r, 5000));
-        return fetchWithRetry(url, options, retries - 1);
-      }
-      throw err;
+  const handleRegister = async () => {
+    if (!fullName.trim() || !password.trim() || !email.trim()) {
+      alert("Name, Email and Password required!");
+      return;
     }
-  };
 
-const handleRegister = async () => {
-  if (!fullName.trim() || !password.trim() || !email.trim()) {
-    alert("Name, Email and Password required!");
-    return;
-  }
+    try {
+      setLoading(true);
 
-  try {
-    setLoading(true);
-
-    await fetch(
-      "https://mealmanagement-backend-production.up.railway.app/api/Meal/TodayTotalPlates"
-    ).catch(() => {});
-
-    const response = await fetch(
-      "https://mealmanagement-backend-production.up.railway.app/api/Employee/Register",
-      {
+      const response = await fetch(`${API}/api/Employee/Register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,24 +37,23 @@ const handleRegister = async () => {
           password: password.trim(),
           email: email.trim(),
         }),
+      });
+
+      const text = await response.text();
+
+      if (response.ok) {
+        alert(text || "Registered Successfully 🎉");
+        navigate("/login");
+      } else {
+        alert(text || "Registration failed");
       }
-    );
-
-    const text = await response.text();
-
-    if (response.ok) {
-      alert(text || "Registered Successfully 🎉");
-      navigate("/login");
-    } else {
-      alert(text || "Registration failed");
+    } catch (error) {
+      console.error(error);
+      alert("Server error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-    alert("Server starting... please wait 30 seconds and try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="container">
@@ -127,4 +106,4 @@ const handleRegister = async () => {
   );
 }
 
-export default Register; 
+export default Register;
