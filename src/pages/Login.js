@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
-  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -16,24 +16,24 @@ function Login() {
   }, [navigate]);
 
   const handleLogin = async () => {
-    if (!fullName.trim() || !password.trim()) {
-      alert("Enter Name and Password!");
+    if (!email.trim() || !password.trim()) {
+      alert("Enter Email and Password!");
       return;
     }
 
     try {
       setLoading(true);
 
-      const response = await fetch("https://mealmanagement-backend-production.up.railway.app/api/Employee/Login",
-
+      const response = await fetch(
+        "https://mealmanagement-backend-production.up.railway.app/api/Employee/Login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            fullName: fullName.trim(),
+            email: email.trim(),
             password: password.trim(),
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -63,9 +63,10 @@ function Login() {
         <h2>Employee Login</h2>
 
         <input
-          placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          type="email"
+          placeholder="Enter Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <div className="password-field">
