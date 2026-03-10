@@ -13,9 +13,9 @@ body {
   background: #0f1419;
   color: #e6edf3;
   min-height: 100vh;
-  /* padding: 20px; */
+  padding: 20px;
    display: flex;
-  justify-content: center; 
+  /* justify-content: center;  */
   align-items: center;
 }
 
