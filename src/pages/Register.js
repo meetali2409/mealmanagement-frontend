@@ -20,7 +20,7 @@ function Register() {
 
   const handleRegister = async () => {
     if (!fullName.trim() || !password.trim() || !email.trim()) {
-      toast.warn("Name, Email and Password required!");
+      toast.warning("Name, Email and Password required!");
       return;
     }
 
