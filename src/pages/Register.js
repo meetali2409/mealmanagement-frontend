@@ -15,6 +15,7 @@ function Register() {
       navigate("/dashboard");
     }
     fetch("https://mealmanagement-backend-production.up.railway.app/api/Meal/TodayTotalPlates")
+
       .catch(() => {});
   }, [navigate]);
 

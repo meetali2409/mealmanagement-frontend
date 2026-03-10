@@ -24,8 +24,8 @@ function Login() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        "https://mealmanagement-backend-production.up.railway.app/api/Employee/Login",
+      const response = await fetch("https://mealmanagement-backend-production.up.railway.app/api/Employee/Login",
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
