@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
 function Dashboard() {
