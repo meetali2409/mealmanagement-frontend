@@ -46,42 +46,40 @@ function History() {
       .catch((err) => console.error(err));
   }, []);
 
+  /* 🔥 AUTO FILTER */
+  useEffect(() => {
+    fetchHistory();
+  }, [fromDate, toDate, name, selectedMealType, fetchHistory]);
+
   return (
     <div className="container">
       <h2>Meal History</h2>
 
       <div className="filter-section">
-
         <div className="filter-group">
-         <label>From Date</label>
+          <label>From Date</label>
 
-<DatePicker
-  selected={fromDate}
-  onChange={(date) => setFromDate(date)}
-  dateFormat="yyyy-MM-dd"
-  customInput={
-    <input
-      placeholder="Select Date"
-      className="date-input"
-    />
-  }
-/>
+          <DatePicker
+            selected={fromDate}
+            onChange={(date) => setFromDate(date)}
+            dateFormat="yyyy-MM-dd"
+            customInput={
+              <input placeholder="Select Date" className="date-input" />
+            }
+          />
         </div>
 
         <div className="filter-group">
-      <label>To Date</label>
+          <label>To Date</label>
 
-<DatePicker
-  selected={toDate}
-  onChange={(date) => setToDate(date)}
-  dateFormat="yyyy-MM-dd"
-  customInput={
-    <input
-      placeholder="Select Date"
-      className="date-input"
-    />
-  }
-/>
+          <DatePicker
+            selected={toDate}
+            onChange={(date) => setToDate(date)}
+            dateFormat="yyyy-MM-dd"
+            customInput={
+              <input placeholder="Select Date" className="date-input" />
+            }
+          />
         </div>
 
         <div className="filter-group">
@@ -107,13 +105,6 @@ function History() {
             ))}
           </select>
         </div>
-
-      </div>
-
-      <div className="filter-button">
-        <button className="primary" onClick={fetchHistory}>
-          Apply Filters
-        </button>
       </div>
 
       <div className="table-wrapper">
