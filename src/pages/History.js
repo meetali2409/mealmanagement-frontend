@@ -53,25 +53,35 @@ function History() {
       <div className="filter-section">
 
         <div className="filter-group">
-          <label>From Date</label>
-          <DatePicker
-            selected={fromDate}
-            onChange={(date) => setFromDate(date)}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Select From Date"
-            className="date-input"
-          />
+         <label>From Date</label>
+
+<DatePicker
+  selected={fromDate}
+  onChange={(date) => setFromDate(date)}
+  dateFormat="yyyy-MM-dd"
+  customInput={
+    <input
+      placeholder="Select Date"
+      className="date-input"
+    />
+  }
+/>
         </div>
 
         <div className="filter-group">
-          <label>To Date</label>
-          <DatePicker
-            selected={toDate}
-            onChange={(date) => setToDate(date)}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="Select To Date"
-            className="date-input"
-          />
+      <label>To Date</label>
+
+<DatePicker
+  selected={toDate}
+  onChange={(date) => setToDate(date)}
+  dateFormat="yyyy-MM-dd"
+  customInput={
+    <input
+      placeholder="Select Date"
+      className="date-input"
+    />
+  }
+/>
         </div>
 
         <div className="filter-group">
