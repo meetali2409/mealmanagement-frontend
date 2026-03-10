@@ -14,21 +14,21 @@ body {
   color: #e6edf3;
   min-height: 100vh;
   padding: 20px;
-   display: flex;
-  /* justify-content: center;  */
-  align-items: center;
+
 }
 
 .container {
   width: 100%;
   max-width: 1000px;
-  margin: 40px auto;
+  margin: auto;
   padding: 35px;
   background: #161b22;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   border-top: 6px solid #1fba7a;
 }
+
+
 
 .container form {
   display: flex;
