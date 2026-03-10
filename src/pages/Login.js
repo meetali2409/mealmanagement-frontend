@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
+import { toast } from "react-toastify";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +17,7 @@ function Login() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      alert("Enter Email and Password!");
+      toast.error("Enter Email and Password!");
       return;
     }
 
@@ -37,7 +37,7 @@ function Login() {
       );
 
       if (!response.ok) {
-        alert("Invalid Credentials");
+        toast.error("Invalid Credentials");
         return;
       }
 
@@ -45,7 +45,7 @@ function Login() {
       localStorage.setItem("employee", JSON.stringify(data));
       navigate("/dashboard");
     } catch (error) {
-      alert("Server Error. Try Again.");
+      toast.error("Server Error. Try Again.");
     } finally {
       setLoading(false);
     }

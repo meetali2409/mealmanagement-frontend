@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
 function Dashboard() {
@@ -61,44 +62,52 @@ function Dashboard() {
   }, [navigate, employee]);
 
   const addMeal = async () => {
-    if (!selectedMeal || !employee?.employeeId) {
-      alert("Select Meal First");
+  if (!selectedMeal || !employee?.employeeId) {
+    toast.warning("Select Meal First");
+    return;
+  }
+
+  if (addingMeal) return;
+
+  try {
+    setAddingMeal(true);
+
+    const response = await fetch(`${API}/api/Meal/Add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employeeId: Number(employee.employeeId),
+        mealTypeId: Number(selectedMeal),
+      }),
+    });
+
+    const text = await response.text();
+
+    let message = text;
+
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.message;
+    } catch {}
+
+    if (!response.ok) {
+      toast.warning(message);
       return;
     }
 
-    if (addingMeal) return;
+    toast.success(message);
 
-    try {
-      setAddingMeal(true);
-
-      const response = await fetch(`${API}/api/Meal/Add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: Number(employee.employeeId),
-          mealTypeId: Number(selectedMeal),
-        }),
-      });
-
-      const text = await response.text();
-
-      if (!response.ok) {
-        alert(text);
-        return;
-      }
-
-      alert(text);
-      setSelectedMeal(null);
-      loadData();
-    } catch (error) {
-      console.error(error);
-      alert("Server Error");
-    } finally {
-      setAddingMeal(false);
-    }
-  };
+    setSelectedMeal(null);
+    loadData();
+  } catch (error) {
+    console.error(error);
+    toast.error("Server Error");
+  } finally {
+    setAddingMeal(false);
+  }
+};
 
   const openHistory = () => {
     setShowAdminBox(true);
@@ -108,7 +117,7 @@ function Dashboard() {
     if (adminPass === "admin123") {
       navigate("/history");
     } else {
-      alert("Wrong Password");
+      toast.warning("Wrong Password");
     }
   };
 

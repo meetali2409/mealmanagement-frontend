@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
+import { toast } from "react-toastify";
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
 function Register() {
@@ -20,7 +20,7 @@ function Register() {
 
   const handleRegister = async () => {
     if (!fullName.trim() || !password.trim() || !email.trim()) {
-      alert("Name, Email and Password required!");
+      toast.warn("Name, Email and Password required!");
       return;
     }
 
@@ -42,14 +42,14 @@ function Register() {
       const text = await response.text();
 
       if (response.ok) {
-        alert(text || "Registered Successfully 🎉");
+        toast.success(text || "Registered Successfully 🎉");
         navigate("/login");
       } else {
-        alert(text || "Registration failed");
+        toast.error(text || "Registration failed");
       }
     } catch (error) {
       console.error(error);
-      alert("Server error. Please try again.");
+      toast.error("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
