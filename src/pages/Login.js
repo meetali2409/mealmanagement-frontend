@@ -33,7 +33,7 @@ function Login() {
             email: email.trim(),
             password: password.trim(),
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -42,7 +42,6 @@ function Login() {
       }
 
       const data = await response.json();
-
       localStorage.setItem("employee", JSON.stringify(data));
       navigate("/dashboard");
     } catch (error) {
