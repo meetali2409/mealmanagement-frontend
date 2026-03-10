@@ -14,13 +14,13 @@ body {
   color: #e6edf3;
   min-height: 100vh;
   padding: 20px;
-
 }
 
 .container {
   width: 100%;
   max-width: 1000px;
   margin: auto;
+  margin-top:12%;
   padding: 35px;
   background: #161b22;
   border-radius: 16px;
