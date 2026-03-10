@@ -13,10 +13,11 @@ body {
   background: #0f1419;
   color: #e6edf3;
   min-height: 100vh;
-  padding: 20px;
+  /* padding: 20px; */
+   display: flex;
+  justify-content: center; 
+  align-items: center;
 }
-
-/* container */
 
 .container {
   width: 100%;
@@ -28,8 +29,6 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   border-top: 6px solid #1fba7a;
 }
-
-/* login container */
 
 .container form {
   display: flex;
