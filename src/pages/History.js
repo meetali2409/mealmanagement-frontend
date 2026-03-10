@@ -17,12 +17,12 @@ function History() {
     let url = `${API}/api/Meal/History?`;
 
     if (fromDate) {
-      const f = fromDate.toISOString().split("T")[0];
+      const f = fromDate.toLocaleDateString("en-CA");
       url += `fromDate=${f}&`;
     }
 
     if (toDate) {
-      const t = toDate.toISOString().split("T")[0];
+      const t = toDate.toLocaleDateString("en-CA");
       url += `toDate=${t}&`;
     }
 
@@ -45,8 +45,6 @@ function History() {
       .then((data) => setMealTypes(data))
       .catch((err) => console.error(err));
   }, []);
-
-  /* 🔥 AUTO FILTER */
   useEffect(() => {
     fetchHistory();
   }, [fromDate, toDate, name, selectedMealType, fetchHistory]);
