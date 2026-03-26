@@ -1,195 +1,228 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
-function Dashboard() {
+function AdminDashboard() {
   const navigate = useNavigate();
-  const employee = JSON.parse(localStorage.getItem("employee") || "null");
 
-  const [mealTypes, setMealTypes] = useState([]);
-  const [totalPlates, setTotalPlates] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [selectedMeal, setSelectedMeal] = useState(null);
-  const [loadingMeals, setLoadingMeals] = useState(true);
-  const [addingMeal, setAddingMeal] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [meals, setMeals] = useState([]);
+  const [records, setRecords] = useState([]);
 
-  const [showAdminBox, setShowAdminBox] = useState(false);
-  const [adminPass, setAdminPass] = useState("");
+  const [empName, setEmpName] = useState("");
+  const [mealName, setMealName] = useState("");
+  const [price, setPrice] = useState("");
 
-  const fetchWithRetry = async (url, options = {}, retries = 2) => {
-    try {
-      const res = await fetch(url, options);
-      if (!res.ok) throw new Error("Server error");
-      return res;
-    } catch (error) {
-      if (retries === 0) throw error;
-      await new Promise((r) => setTimeout(r, 20000));
-      return fetchWithRetry(url, options, retries - 1);
-    }
-  };
+  const [editEmpId, setEditEmpId] = useState(null);
+  const [editMealId, setEditMealId] = useState(null);
 
+  // ================= LOAD DATA =================
   const loadData = async () => {
     try {
-      setLoadingMeals(true);
+      const emp = await fetch(`${API}/api/Employee/All`).then(r => r.json());
+      const meal = await fetch(`${API}/api/MealType/All`).then(r => r.json());
+      const rec = await fetch(`${API}/api/Meal/All`).then(r => r.json());
 
-      const mealRes = await fetchWithRetry(`${API}/api/MealType/All`);
-      const mealData = await mealRes.json();
-      setMealTypes(mealData || []);
-
-      const platesRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalPlates`);
-      const platesData = await platesRes.json();
-      setTotalPlates(platesData);
-
-      const amountRes = await fetchWithRetry(`${API}/api/Meal/TodayTotalAmount`);
-      const amountData = await amountRes.json();
-      setTotalAmount(amountData);
-
-      setLoadingMeals(false);
-    } catch (error) {
-      console.error("Error loading data:", error);
+      setEmployees(emp || []);
+      setMeals(meal || []);
+      setRecords(rec || []);
+    } catch (err) {
+      toast.error("Error loading data");
     }
   };
 
   useEffect(() => {
-    if (!employee) {
-      navigate("/login");
-      return;
-    }
-
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, employee]);
+  }, []);
 
-  const addMeal = async () => {
-  if (!selectedMeal || !employee?.employeeId) {
-    toast.warning("Select Meal First");
-    return;
-  }
+  // ================= EMPLOYEE =================
+  const saveEmployee = async () => {
+    if (!empName) return;
 
-  if (addingMeal) return;
-
-  try {
-    setAddingMeal(true);
-
-    const response = await fetch(`${API}/api/Meal/Add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        employeeId: Number(employee.employeeId),
-        mealTypeId: Number(selectedMeal),
-      }),
-    });
-
-    const text = await response.text();
-
-    let message = text;
-
-    try {
-      const parsed = JSON.parse(text);
-      message = parsed.message;
-    } catch {}
-
-    if (!response.ok) {
-      toast.warning(message);
-      return;
-    }
-
-    toast.success(message);
-
-    setSelectedMeal(null);
-    loadData();
-  } catch (error) {
-    console.error(error);
-    toast.error("Server Error");
-  } finally {
-    setAddingMeal(false);
-  }
-};
-
-  const openHistory = () => {
-    setShowAdminBox(true);
-  };
-
-  const checkAdminPassword = () => {
-    if (adminPass === "admin123") {
-      navigate("/history");
+    if (editEmpId) {
+      await fetch(`${API}/api/Employee/Update/${editEmpId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: empName }),
+      });
+      toast.success("Employee Updated");
     } else {
-      toast.warning("Wrong Password");
+      await fetch(`${API}/api/Employee/Add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: empName }),
+      });
+      toast.success("Employee Added");
     }
+
+    setEmpName("");
+    setEditEmpId(null);
+    loadData();
   };
 
+  const deleteEmployee = async (id) => {
+    await fetch(`${API}/api/Employee/Delete/${id}`, { method: "DELETE" });
+    toast.success("Deleted");
+    loadData();
+  };
+
+  const editEmployee = (emp) => {
+    setEmpName(emp.fullName);
+    setEditEmpId(emp.employeeId);
+  };
+
+  // ================= MEALS =================
+  const saveMeal = async () => {
+    if (!mealName || !price) return;
+
+    if (editMealId) {
+      await fetch(`${API}/api/MealType/Update/${editMealId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mealName, fixedPrice: price }),
+      });
+      toast.success("Meal Updated");
+    } else {
+      await fetch(`${API}/api/MealType/Add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mealName, fixedPrice: price }),
+      });
+      toast.success("Meal Added");
+    }
+
+    setMealName("");
+    setPrice("");
+    setEditMealId(null);
+    loadData();
+  };
+
+  const deleteMeal = async (id) => {
+    await fetch(`${API}/api/MealType/Delete/${id}`, { method: "DELETE" });
+    toast.success("Deleted");
+    loadData();
+  };
+
+  const editMeal = (meal) => {
+    setMealName(meal.mealName);
+    setPrice(meal.fixedPrice);
+    setEditMealId(meal.mealTypeId);
+  };
+
+  // ================= LOGOUT =================
   const logout = () => {
-    localStorage.removeItem("employee");
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
     <div className="container">
-      <h2>Welcome {employee?.fullName}</h2>
+      <h2>Admin Dashboard</h2>
 
-     <div className="top-bar">
+      <div className="card">
+        <h3>Employees</h3>
 
-  {!showAdminBox && (
-   <button className="secondary" onClick={openHistory}>
-  View Records
-</button>
-  )}
+        <input
+          placeholder="Employee Name"
+          value={empName}
+          onChange={(e) => setEmpName(e.target.value)}
+        />
 
-  {showAdminBox && (
-    <div className="admin-login">
-      <input
-        type="password"
-        placeholder="Admin Password"
-        value={adminPass}
-        onChange={(e) => setAdminPass(e.target.value)}
-      />
+        <button className="primary" onClick={saveEmployee}>
+          {editEmpId ? "Update" : "Add"}
+        </button>
 
-      <button className="secondary" onClick={checkAdminPassword}>
-        Go
-      </button>
-    </div>
-  )}
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-</div>
+          <tbody>
+            {employees.map((e) => (
+              <tr key={e.employeeId}>
+                <td>{e.fullName}</td>
+                <td>
+                  <button onClick={() => editEmployee(e)}>Edit</button>
+                  <button onClick={() => deleteEmployee(e.employeeId)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="card">
+        <h3>Meal Types</h3>
 
-      <h3>Add Meal</h3>
+        <input
+          placeholder="Meal Name"
+          value={mealName}
+          onChange={(e) => setMealName(e.target.value)}
+        />
 
-      <select
-        value={selectedMeal ?? ""}
-        onChange={(e) => setSelectedMeal(Number(e.target.value))}
-      >
-        <option value="">Select Meal</option>
+        <input
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
 
-        {mealTypes.map((m) => (
-          <option key={m.id || m.mealTypeId} value={m.id || m.mealTypeId}>
-            {m.mealName} - ₹{m.fixedPrice}
-          </option>
-        ))}
-      </select>
+        <button className="primary" onClick={saveMeal}>
+          {editMealId ? "Update" : "Add"}
+        </button>
 
-      <button
-        className="primary"
-        onClick={addMeal}
-        disabled={!selectedMeal || addingMeal}
-      >
-        {addingMeal ? "Adding..." : "Add Meal"}
-      </button>
+        <table>
+          <thead>
+            <tr>
+              <th>Meal</th>
+              <th>Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-      {loadingMeals && <p></p>}
+          <tbody>
+            {meals.map((m) => (
+              <tr key={m.mealTypeId}>
+                <td>{m.mealName}</td>
+                <td>₹{m.fixedPrice}</td>
+                <td>
+                  <button onClick={() => editMeal(m)}>Edit</button>
+                  <button onClick={() => deleteMeal(m.mealTypeId)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="card">
+        <h3>All Records</h3>
 
-      <div className="summary-box">
-        <div className="summary-card">
-          <h4>Total Plates</h4>
-          <p>{totalPlates}</p>
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Meal</th>
+              <th>Date</th>
+            </tr>
+          </thead>
 
-        <div className="summary-card">
-          <h4>Total Amount</h4>
-          <p>₹{totalAmount}</p>
-        </div>
+          <tbody>
+            {records.map((r) => (
+              <tr key={r.id}>
+                <td>{r.employeeName}</td>
+                <td>{r.mealName}</td>
+                <td>{r.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <button className="accent" onClick={logout}>
@@ -199,4 +232,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default AdminDashboard;
