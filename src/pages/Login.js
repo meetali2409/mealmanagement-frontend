@@ -52,7 +52,7 @@ function Login() {
       localStorage.setItem("employee", JSON.stringify(data));
 
       if (data.role === "Admin") {
-        navigate("/admidashboard");
+        navigate("/admindashboard");
       } else {
         navigate("/dashboard");
       }
