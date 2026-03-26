@@ -118,7 +118,6 @@ const deleteEmployee = async (id) => {
     toast.error("Error deleting");
   }
 };
-
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
