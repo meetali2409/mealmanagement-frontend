@@ -96,11 +96,28 @@ function AdminDashboard() {
     loadData();
   };
 
-  const deleteEmployee = async (id) => {
-    await fetch(`${API}/api/Employee/Delete/${id}`, { method: "DELETE" });
-    toast.success("Deleted");
+const deleteEmployee = async (id) => {
+  try {
+    const res = await fetch(`${API}/api/Employee/${id}`, {
+      method: "DELETE"
+    });
+
+    const text = await res.text();
+    console.log("Delete response:", text);
+
+    if (!res.ok) {
+      toast.error("Delete failed");
+      return;
+    }
+
+    toast.success("Deleted successfully");
     loadData();
-  };
+
+  } catch (err) {
+    console.log(err);
+    toast.error("Error deleting");
+  }
+};
 
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
