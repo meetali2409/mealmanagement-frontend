@@ -5,8 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
-import AdminDashboard from "./pages/AdminDashBoard.js";
-
+import AdminDashBoard from "./pages/AdminDashBoard";
 
 function App() {
   return (
@@ -16,7 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/history" element={<History />} />
-        <Route path="/admindashboard" element={<AdminDashboard />} />
+        <Route path="/admindashboard" element={<AdminDashBoard/>}/>
       </Routes>
       <ToastContainer
         position="top-right"
