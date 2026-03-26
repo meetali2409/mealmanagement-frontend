@@ -18,11 +18,17 @@ function AdminDashboard() {
   const [editEmpId, setEditEmpId] = useState(null);
   const [editMealId, setEditMealId] = useState(null);
 
+  const [todayPlates, setTodayPlates] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+
+  const [search, setSearch] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+
   const loadData = async () => {
     try {
       const emp = await fetch(`${API}/api/Employee/All`).then(r => r.json());
       const meal = await fetch(`${API}/api/MealType/All`).then(r => r.json());
-      const rec = await fetch(`${API}/api/Meal/All`).then(r => r.json());
+      const rec = await fetch(`${API}/api/Meal/History`).then(r => r.json());
 
       setEmployees(emp || []);
       setMeals(meal || []);
@@ -31,9 +37,21 @@ function AdminDashboard() {
       toast.error("Error loading data");
     }
   };
+  const loadStats = async () => {
+    try {
+      const plates = await fetch(`${API}/api/Meal/TodayTotalPlates`).then(r => r.json());
+      const amount = await fetch(`${API}/api/Meal/TodayTotalAmount`).then(r => r.json());
+
+      setTodayPlates(plates);
+      setTotalAmount(amount);
+    } catch {
+      toast.error("Error loading stats");
+    }
+  };
 
   useEffect(() => {
     loadData();
+    loadStats();
   }, []);
 
   const saveEmployee = async () => {
@@ -70,8 +88,6 @@ function AdminDashboard() {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
   };
-
-
   const saveMeal = async () => {
     if (!mealName || !price) return;
 
@@ -109,6 +125,15 @@ function AdminDashboard() {
     setEditMealId(meal.mealTypeId);
   };
 
+  const filteredEmployees = employees.filter(e =>
+    e.fullName.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredRecords = records.filter(r => {
+    if (!selectedDate) return true;
+    return r.date === selectedDate;
+  });
+
   const logout = () => {
     localStorage.clear();
     navigate("/login");
@@ -130,13 +155,23 @@ function AdminDashboard() {
         </div>
 
         <div className="summary-card">
-          <h4>Total Records</h4>
-          <p>{records.length}</p>
+          <h4>Today Plates</h4>
+          <p>{todayPlates}</p>
+        </div>
+
+        <div className="summary-card">
+          <h4>Total Revenue</h4>
+          <p>₹{totalAmount}</p>
         </div>
       </div>
-
       <div className="add-meal-section">
         <h3>Employees</h3>
+
+        <input
+          placeholder="Search employee..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
         <input
           placeholder="Employee Name"
@@ -156,8 +191,9 @@ function AdminDashboard() {
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
-              {employees.map((e) => (
+              {filteredEmployees.map((e) => (
                 <tr key={e.employeeId}>
                   <td>{e.fullName}</td>
                   <td>
@@ -169,10 +205,10 @@ function AdminDashboard() {
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
       </div>
-
       <div className="add-meal-section">
         <h3>Meal Types</h3>
 
@@ -201,6 +237,7 @@ function AdminDashboard() {
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {meals.map((m) => (
                 <tr key={m.mealTypeId}>
@@ -215,12 +252,19 @@ function AdminDashboard() {
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
       </div>
-
       <div className="add-meal-section">
         <h3>All Records</h3>
+
+        <input
+          type="date"
+          className="date-input"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
 
         <div className="table-wrapper">
           <table>
@@ -231,8 +275,9 @@ function AdminDashboard() {
                 <th>Date</th>
               </tr>
             </thead>
+
             <tbody>
-              {records.map((r) => (
+              {filteredRecords.map((r) => (
                 <tr key={r.id}>
                   <td>{r.employeeName}</td>
                   <td>{r.mealName}</td>
@@ -240,6 +285,7 @@ function AdminDashboard() {
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
       </div>
