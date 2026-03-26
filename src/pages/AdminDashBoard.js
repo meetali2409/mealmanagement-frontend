@@ -24,28 +24,46 @@ function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
+  const [loading, setLoading] = useState(true);
+
   const loadData = async () => {
     try {
-      const emp = await fetch(`${API}/api/Employee/All`).then(r => r.json());
-      const meal = await fetch(`${API}/api/MealType/All`).then(r => r.json());
-      const rec = await fetch(`${API}/api/Meal/History`).then(r => r.json());
+      const [empRes, mealRes, recRes] = await Promise.all([
+        fetch(`${API}/api/Employee/All`),
+        fetch(`${API}/api/MealType/All`),
+        fetch(`${API}/api/Meal/History`)
+      ]);
 
-      setEmployees(emp || []);
-      setMeals(meal || []);
-      setRecords(rec || []);
-    } catch {
+      const emp = await empRes.json();
+      const meal = await mealRes.json();
+      const rec = await recRes.json();
+
+      if (Array.isArray(emp)) setEmployees(emp);
+      if (Array.isArray(meal)) setMeals(meal);
+      if (Array.isArray(rec)) setRecords(rec);
+
+    } catch (err) {
+      console.log("Error loading data:", err);
       toast.error("Error loading data");
+    } finally {
+      setLoading(false);
     }
   };
+
   const loadStats = async () => {
     try {
-      const plates = await fetch(`${API}/api/Meal/TodayTotalPlates`).then(r => r.json());
-      const amount = await fetch(`${API}/api/Meal/TodayTotalAmount`).then(r => r.json());
+      const [platesRes, amountRes] = await Promise.all([
+        fetch(`${API}/api/Meal/TodayTotalPlates`),
+        fetch(`${API}/api/Meal/TodayTotalAmount`)
+      ]);
 
-      setTodayPlates(plates);
-      setTotalAmount(amount);
-    } catch {
-      toast.error("Error loading stats");
+      const plates = await platesRes.json();
+      const amount = await amountRes.json();
+
+      setTodayPlates(plates || 0);
+      setTotalAmount(amount || 0);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -88,6 +106,7 @@ function AdminDashboard() {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
   };
+
   const saveMeal = async () => {
     if (!mealName || !price) return;
 
@@ -126,7 +145,7 @@ function AdminDashboard() {
   };
 
   const filteredEmployees = employees.filter(e =>
-    e.fullName.toLowerCase().includes(search.toLowerCase())
+    e.fullName?.toLowerCase().includes(search.toLowerCase())
   );
 
   const filteredRecords = records.filter(r => {
@@ -138,6 +157,10 @@ function AdminDashboard() {
     localStorage.clear();
     navigate("/login");
   };
+
+  if (loading) {
+    return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+  }
 
   return (
     <div className="containers">
@@ -164,6 +187,7 @@ function AdminDashboard() {
           <p>₹{totalAmount}</p>
         </div>
       </div>
+
       <div className="add-meal-section">
         <h3>Employees</h3>
 
@@ -191,7 +215,6 @@ function AdminDashboard() {
                 <th>Action</th>
               </tr>
             </thead>
-
             <tbody>
               {filteredEmployees.map((e) => (
                 <tr key={e.employeeId}>
@@ -205,10 +228,10 @@ function AdminDashboard() {
                 </tr>
               ))}
             </tbody>
-
           </table>
         </div>
       </div>
+
       <div className="add-meal-section">
         <h3>Meal Types</h3>
 
@@ -237,7 +260,6 @@ function AdminDashboard() {
                 <th>Action</th>
               </tr>
             </thead>
-
             <tbody>
               {meals.map((m) => (
                 <tr key={m.mealTypeId}>
@@ -252,10 +274,10 @@ function AdminDashboard() {
                 </tr>
               ))}
             </tbody>
-
           </table>
         </div>
       </div>
+
       <div className="add-meal-section">
         <h3>All Records</h3>
 
@@ -275,17 +297,15 @@ function AdminDashboard() {
                 <th>Date</th>
               </tr>
             </thead>
-
             <tbody>
               {filteredRecords.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.employeeName}</td>
-                  <td>{r.mealName}</td>
+                  <td>{r.employee?.fullName}</td>
+                  <td>{r.mealType?.mealName}</td>
                   <td>{r.date}</td>
                 </tr>
               ))}
             </tbody>
-
           </table>
         </div>
       </div>
