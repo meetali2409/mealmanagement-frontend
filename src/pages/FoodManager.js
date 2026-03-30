@@ -12,6 +12,7 @@ function FoodManager() {
 
   const [editId, setEditId] = useState(null);
 
+  // ================= LOAD DATA =================
   const loadData = async () => {
     try {
       const foodRes = await fetch(`${API}/api/Food/All`);
@@ -20,9 +21,12 @@ function FoodManager() {
       const mealRes = await fetch(`${API}/api/MealType/All`);
       const mealData = await mealRes.json();
 
-      setFoods(foodData.data || []);
-      setMealTypes(mealData || []);
-    } catch {
+      // 🔥 SAFE HANDLING
+      setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
+      setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
+
+    } catch (err) {
+      console.error(err);
       toast.error("Error loading data");
     }
   };
@@ -31,6 +35,7 @@ function FoodManager() {
     loadData();
   }, []);
 
+  // ================= ADD / UPDATE =================
   const saveFood = async () => {
     if (!foodName || !mealTypeId) {
       toast.warning("Fill all fields");
@@ -43,25 +48,29 @@ function FoodManager() {
     };
 
     try {
-      if (editId) {
-        await fetch(`${API}/api/Food/Update/${editId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        toast.success("Food Updated");
-      } else {
-        await fetch(`${API}/api/Food/Add`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        toast.success("Food Added");
+      const url = editId
+        ? `${API}/api/Food/Update/${editId}`
+        : `${API}/api/Food/Add`;
+
+      const method = editId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        toast.error("Operation failed");
+        return;
       }
+
+      toast.success(editId ? "Food Updated" : "Food Added");
 
       setFoodName("");
       setMealTypeId("");
       setEditId(null);
+
       loadData();
 
     } catch {
@@ -69,15 +78,29 @@ function FoodManager() {
     }
   };
 
+  // ================= DELETE =================
   const deleteFood = async (id) => {
-    await fetch(`${API}/api/Food/Delete/${id}`, {
-      method: "DELETE",
-    });
-    toast.success("Deleted");
-    loadData();
+    if (!window.confirm("Delete this food?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/Food/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        toast.error("Delete failed");
+        return;
+      }
+
+      toast.success("Deleted");
+      loadData();
+
+    } catch {
+      toast.error("Error deleting");
+    }
   };
 
-  // EDIT
+  // ================= EDIT =================
   const editFood = (f) => {
     setFoodName(f.foodName);
     setMealTypeId(f.mealTypeId);
@@ -88,6 +111,7 @@ function FoodManager() {
     <div className="container">
       <h2>🍽 Food Manager</h2>
 
+      {/* ADD / EDIT FORM */}
       <div className="card">
         <input
           placeholder="Food Name"
@@ -100,46 +124,59 @@ function FoodManager() {
           onChange={(e) => setMealTypeId(e.target.value)}
         >
           <option value="">Select Meal Type</option>
-          {mealTypes.map((m) => (
-            <option key={m.mealTypeId} value={m.mealTypeId}>
-              {m.mealName}
-            </option>
-          ))}
+
+          {mealTypes.length > 0 ? (
+            mealTypes.map((m) => (
+              <option key={m.mealTypeId} value={m.mealTypeId}>
+                {m.mealName}
+              </option>
+            ))
+          ) : (
+            <option disabled>No Meal Types Found</option>
+          )}
         </select>
 
         <button className="primary" onClick={saveFood}>
-          {editId ? "Update" : "Add"}
+          {editId ? "Update Food" : "Add Food"}
         </button>
       </div>
 
+      {/* LIST */}
       <div className="card">
         <h3>Food List</h3>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Food</th>
-              <th>Meal Type</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {foods.map((f) => (
-              <tr key={f.foodId}>
-                <td>{f.foodName}</td>
-                <td>{f.mealType?.mealName || "-"}</td>
-                <td>
-                  <button onClick={() => editFood(f)}>Edit</button>
-                  <button onClick={() => deleteFood(f.foodId)}>
-                    Delete
-                  </button>
-                </td>
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Food</th>
+                <th>Meal Type</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
 
-        </table>
+            <tbody>
+              {foods.length > 0 ? (
+                foods.map((f) => (
+                  <tr key={f.foodId}>
+                    <td>{f.foodName}</td>
+                    <td>{f.mealType?.mealName || "-"}</td>
+                    <td>
+                      <button onClick={() => editFood(f)}>Edit</button>
+                      <button onClick={() => deleteFood(f.foodId)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">No Food Found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

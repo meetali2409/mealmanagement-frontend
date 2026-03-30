@@ -16,7 +16,7 @@ function AdminDashboard() {
 
   const [search, setSearch] = useState("");
 
-  // ================= LOAD DATA =================
+  // ================= LOAD =================
   const loadEmployees = async () => {
     try {
       const res = await fetch(`${API}/api/Employee/All`);
@@ -43,40 +43,66 @@ function AdminDashboard() {
     loadStats();
   }, []);
 
-  // ================= EMPLOYEE CRUD =================
+  // ================= SAVE =================
   const saveEmployee = async () => {
     if (!empName.trim()) {
       toast.warning("Enter employee name");
       return;
     }
 
-    const url = editEmpId
-      ? `${API}/api/Employee/Update/${editEmpId}`
-      : `${API}/api/Employee/Add`;
+    try {
+      const url = editEmpId
+        ? `${API}/api/Employee/Update/${editEmpId}`
+        : `${API}/api/Employee/Add`;
 
-    const method = editEmpId ? "PUT" : "POST";
+      const method = editEmpId ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName: empName }),
-    });
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeId: editEmpId, // 🔥 FIX
+          fullName: empName,
+        }),
+      });
 
-    toast.success(editEmpId ? "Updated" : "Added");
+      if (!res.ok) {
+        toast.error("Operation failed");
+        return;
+      }
 
-    setEmpName("");
-    setEditEmpId(null);
-    loadEmployees();
+      toast.success(editEmpId ? "Updated" : "Added");
+
+      setEmpName("");
+      setEditEmpId(null);
+      loadEmployees();
+    } catch {
+      toast.error("Error saving employee");
+    }
   };
 
+  // ================= DELETE =================
   const deleteEmployee = async (id) => {
-    await fetch(`${API}/api/Employee/Delete/${id}`, {
-      method: "DELETE",
-    });
-    toast.success("Deleted");
-    loadEmployees();
+    if (!window.confirm("Delete this employee?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/Employee/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        toast.error("Delete failed");
+        return;
+      }
+
+      toast.success("Deleted");
+      loadEmployees();
+    } catch {
+      toast.error("Error deleting");
+    }
   };
 
+  // ================= EDIT =================
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
