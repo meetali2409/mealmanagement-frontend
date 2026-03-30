@@ -166,52 +166,7 @@ function AdminDashboard() {
           <h4>Revenue</h4>
           <p>₹{totalAmount}</p>
         </div>
-      </div>
-
-      <div className="card">
-        <h3>👤 Employees</h3>
-
-        <input
-          placeholder="Search Employee"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <input
-          placeholder="Employee Name"
-          value={empName}
-          onChange={(e) => setEmpName(e.target.value)}
-        />
-
-        <button className="primary" onClick={saveEmployee}>
-          {editEmpId ? "Update" : "Add"}
-        </button>
-
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredEmployees.map((e) => (
-                <tr key={e.employeeId}>
-                  <td>{e.fullName}</td>
-                  <td>
-                    <button onClick={() => editEmployee(e)}>Edit</button>
-                    <button onClick={() => deleteEmployee(e.employeeId)}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      </div> 
       <div className="card">
         <h3>🍽 Meal Types</h3>
 
