@@ -12,30 +12,27 @@ function FoodManager() {
 
   const [editId, setEditId] = useState(null);
 
-  // ================= LOAD DATA =================
-  const loadData = async () => {
-    try {
-      const foodRes = await fetch(`${API}/api/Food/All`);
-      const foodData = await foodRes.json();
+const loadData = async () => {
+  try {
+    const foodRes = await fetch(`${API}/api/Food/All`);
+    const foodData = await foodRes.json();
 
-      const mealRes = await fetch(`${API}/api/MealType/All`);
-      const mealData = await mealRes.json();
+    const mealRes = await fetch(`${API}/api/MealType/All`);
+    const mealData = await mealRes.json();
 
-      // 🔥 SAFE HANDLING
-      setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
-      setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
+    setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
+    setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
 
-    } catch (err) {
-      console.error(err);
-      toast.error("Error loading data");
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Error loading data");
+  }
+};
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // ================= ADD / UPDATE =================
   const saveFood = async () => {
     if (!foodName || !mealTypeId) {
       toast.warning("Fill all fields");
@@ -78,7 +75,6 @@ function FoodManager() {
     }
   };
 
-  // ================= DELETE =================
   const deleteFood = async (id) => {
     if (!window.confirm("Delete this food?")) return;
 
@@ -100,7 +96,6 @@ function FoodManager() {
     }
   };
 
-  // ================= EDIT =================
   const editFood = (f) => {
     setFoodName(f.foodName);
     setMealTypeId(f.mealTypeId);
@@ -111,7 +106,7 @@ function FoodManager() {
     <div className="container">
       <h2>🍽 Food Manager</h2>
 
-      {/* ADD / EDIT FORM */}
+   
       <div className="card">
         <input
           placeholder="Food Name"
