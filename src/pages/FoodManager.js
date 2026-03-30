@@ -11,24 +11,33 @@ function FoodManager() {
   const [mealTypeId, setMealTypeId] = useState("");
 
   const [editId, setEditId] = useState(null);
-  const loadData = async () => {
+const loadData = async () => {
+  try {
+    let foodData = [];
     try {
       const foodRes = await fetch(`${API}/api/Food/All`);
-      const foodData = await foodRes.json();
-
-      const mealRes = await fetch(`${API}/api/MealType/All`);
-      const mealData = await mealRes.json();
-
-      console.log("Meal API:", mealData);
-
-      setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
-
-      setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error loading data");
+      const f = await foodRes.json();
+      foodData = Array.isArray(f) ? f : f.data || [];
+    } catch (e) {
+      console.error("Food error:", e);
     }
-  };
+    let mealData = [];
+    try {
+      const mealRes = await fetch(`${API}/api/MealType/All`);
+      const m = await mealRes.json();
+      mealData = Array.isArray(m) ? m : m.data || [];
+    } catch (e) {
+      console.error("Meal error:", e);
+    }
+
+    setFoods(foodData);
+    setMealTypes(mealData);
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Error loading data");
+  }
+};
 
   useEffect(() => {
     loadData();
