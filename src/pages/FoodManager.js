@@ -52,9 +52,7 @@ function FoodManager() {
       foodName: foodName.trim(),
       mealTypeId: Number(mealTypeId),
     };
-
     console.log("BODY:", body);
-
     try {
       const url = editId
         ? `${API}/api/Food/Update/${editId}`
@@ -67,15 +65,12 @@ function FoodManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const text = await res.text();
       console.log("SERVER RESPONSE:", text);
-
       if (!res.ok) {
-        toast.error(text || "Operation failed");
+        toast.error(text || "Operation Failed");
         return;
       }
-
       toast.success(editId ? "Food Updated" : "Food Added");
 
       setFoodName("");
