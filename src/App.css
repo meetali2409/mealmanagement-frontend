@@ -1,10 +1,12 @@
+/* ================= GLOBAL ================= */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
+
 body {
   background: radial-gradient(circle at top, #0f2027, #0f1419);
   color: #e6edf3;
@@ -12,135 +14,115 @@ body {
   padding: 20px;
 }
 
-.containers {
-  width: 100%;
-  max-width: 1000px;
+/* ================= DASHBOARD ================= */
+
+.dashboard {
+  max-width: 1200px;
   margin: auto;
-  margin-top: 2%;
-  padding: 35px;
-
-  backdrop-filter: blur(12px);
-  background: rgba(22, 27, 34, 0.9);
-
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.05);
-
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 }
 
-h2 {
-  text-align: center;
+/* HEADER */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 25px;
-  font-size: 28px;
-  color: #1fba7a;
-  text-shadow: 0 0 10px rgba(31,186,122,0.6);
 }
 
-h3 {
-  margin-bottom: 15px;
-  font-weight: 600;
+.dashboard-header h2 {
+  font-size: 26px;
+  color: #1fba7a;
 }
+
+/* HEADER BUTTONS */
+.dashboard-header button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  margin-left: 10px;
+  cursor: pointer;
+  background: #1fba7a;
+  color: white;
+  transition: 0.3s;
+}
+
+.dashboard-header button:hover {
+  transform: scale(1.05);
+}
+
+/* LOGOUT */
+.logout-btn {
+  background: linear-gradient(135deg, #e54848, #c0392b);
+}
+
+/* ================= CARDS ================= */
+
+.card {
+  background: linear-gradient(145deg, #11161c, #0f1419);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(31,186,122,0.2);
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(31,186,122,0.2);
+}
+
+.card h3 {
+  margin-bottom: 15px;
+  color: #1fba7a;
+}
+
+/* ================= INPUTS ================= */
 
 input, select {
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 11px 13px;
+  margin-bottom: 10px;
+  border-radius: 10px;
   border: 1px solid #2d333b;
   background: #0f1419;
-  color: #e6edf3;
+  color: white;
   transition: 0.3s;
 }
 
 input:focus, select:focus {
   outline: none;
   border-color: #1fba7a;
-  box-shadow: 0 0 12px rgba(31,186,122,0.5);
+  box-shadow: 0 0 10px rgba(31,186,122,0.5);
 }
+
+/* ================= BUTTONS ================= */
 
 button {
-  padding: 11px;
-  border-radius: 12px;
   border: none;
-  font-weight: 600;
   cursor: pointer;
-  margin-top: 15px;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
   transition: 0.3s;
-  width: 100%;
 }
 
+/* PRIMARY */
 button.primary {
   background: linear-gradient(135deg, #1fba7a, #16a085);
   color: white;
-  box-shadow: 0 0 10px rgba(31,186,122,0.4);
 }
 
 button.primary:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(31,186,122,0.8);
 }
 
-button.accent {
-  background: linear-gradient(135deg, #e54848, #c0392b);
-  color: white;
-}
-
-button.accent:hover {
-  transform: scale(1.05);
-}
-
-.add-meal-section {
-  background: #11161c;
-  padding: 22px;
-  border-radius: 16px;
-  border: 1px solid #2d333b;
-  margin-bottom: 25px;
-
-  animation: fadeIn 0.4s ease;
-}
-
-.summary-box {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.summary-card {
-  flex: 1 1 250px;
-  padding: 22px;
-  border-radius: 18px;
-
-  background: linear-gradient(145deg, #11161c, #0f1419);
-  border: 1px solid #2d333b;
-
-  box-shadow:
-    0 5px 20px rgba(0,0,0,0.6),
-    inset 0 0 10px rgba(31,186,122,0.1);
-
-  transition: 0.3s;
-}
-
-.summary-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow:
-    0 15px 40px rgba(31,186,122,0.3),
-    0 0 25px rgba(31,186,122,0.2);
-}
-
-.summary-card h4 {
-  color: #9da7b1;
-  margin-bottom: 10px;
-}
-
-.summary-card p {
-  font-size: 22px;
-  font-weight: bold;
-  color: #1fba7a;
-}
+/* ================= TABLE ================= */
 
 .table-wrapper {
-  margin-top: 20px;
-  overflow-x: auto;
-  border-radius: 14px;
+  margin-top: 15px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #2d333b;
 }
 
 table {
@@ -154,44 +136,205 @@ thead {
   color: white;
 }
 
-th, td {
+th {
+  text-align: left;
   padding: 12px;
-  text-align: center;
 }
 
 td {
+  padding: 12px;
   border-bottom: 1px solid #2d333b;
 }
 
-tbody tr {
-  transition: 0.2s;
-}
-
+/* ROW EFFECT */
 tbody tr:hover {
   background: rgba(31,186,122,0.1);
-  transform: scale(1.01);
 }
 
-.date-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  background: #0f1419;
+tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.02);
+}
+
+/* ================= ACTION BUTTONS ================= */
+
+.table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.edit-btn {
+  background: #1fba7a;
   color: white;
-  border: 1px solid #333;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  padding: 5px 10px;
+  border-radius: 6px;
 }
 
+.delete-btn {
+  background: #e54848;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+.table-actions button:hover {
+  transform: scale(1.08);
+}
+
+/* ================= HISTORY FILTER ================= */
+
+.history-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* ================= SUMMARY CARDS ================= */
+
+.summary-box {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 180px;
+  padding: 20px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #11161c, #0f1419);
+  border: 1px solid #2d333b;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.summary-card:hover {
+  transform: scale(1.03);
+}
+
+.summary-card h4 {
+  color: #9da7b1;
+  margin-bottom: 10px;
+}
+
+.summary-card p {
+  font-size: 22px;
+  color: #1fba7a;
+  font-weight: bold;
+}
+
+/* ================= LOGIN / REGISTER ================= */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 16px;
+  background: rgba(22, 27, 34, 0.95);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+}
+
+.login-title {
+  text-align: center;
+  color: #1fba7a;
+  margin-bottom: 20px;
+}
+
+.login-input {
+  margin-bottom: 12px;
+}
+
+.login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #1fba7a, #16a085);
+  color: white;
+  padding: 12px;
+}
+
+.login-btn:hover {
+  transform: scale(1.05);
+}
+
+.register-text {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.register-text a {
+  color: #1fba7a;
+  text-decoration: none;
+}
+
+.register-text a:hover {
+  text-decoration: underline;
+}
+/* ================= PASSWORD FIX ================= */
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 45px; /* icon ke liye space */
+}
+
+.password-wrapper span {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #1fba7a;
+  user-select: none;
+  transition: 0.3s;
+}
+
+.password-wrapper span:hover {
+  transform: translateY(-50%) scale(1.2);
+}
+/* ================= RESPONSIVE ================= */
+.meal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.meal-item {
+  padding: 15px;
+  border-radius: 12px;
+  background: #0f1419;
+  border: 1px solid #2d333b;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.meal-item:hover {
+  transform: scale(1.05);
+}
+
+.meal-item.active {
+  border: 2px solid #1fba7a;
+  box-shadow: 0 0 15px rgba(31,186,122,0.6);
+}
 @media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .summary-box {
     flex-direction: column;
   }

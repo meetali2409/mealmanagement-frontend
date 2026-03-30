@@ -65,48 +65,53 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className="login-container">
       <form
+        className="login-card"
         onSubmit={(e) => {
           e.preventDefault();
           handleLogin();
         }}
       >
-        <h2>Login</h2>
+        <h2 className="login-title">Login</h2>
 
-        <input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* EMAIL */}
+        <div className="input-group">
+          <input
+            type="email"
+            className="login-input"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <div className="password-field">
+        {/* PASSWORD */}
+        <div className=" input-group password-wrapper">
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="login-input"
           />
 
-          <span
-            className="toggle-password"
-            onClick={() => setShowPassword(!showPassword)}
-          >
+          <span onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? "🙈" : "👁"}
           </span>
         </div>
 
-        <button type="submit" className="primary" disabled={loading}>
+        {/* BUTTON */}
+        <button type="submit" className="login-btn" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        <p className="auth-link">
+        {/* REGISTER */}
+        <p className="register-text">
           Don’t have an account? <Link to="/">Register</Link>
         </p>
       </form>
     </div>
   );
 }
-
 export default Login;

@@ -8,7 +8,7 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("User"); 
+  const [role, setRole] = useState("User");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -44,7 +44,7 @@ function Register() {
           fullName: fullName.trim(),
           password: password.trim(),
           email: email.trim(),
-          role: role, 
+          role: role,
         }),
       });
 
@@ -65,54 +65,66 @@ function Register() {
   };
 
   return (
-    <div className="container">
+    <div className="login-container">
       <form
+        className="login-card"
         onSubmit={(e) => {
           e.preventDefault();
           handleRegister();
         }}
       >
-        <h2>Create Account</h2>
+        <h2 className="login-title">Create Account</h2>
 
+        {/* EMAIL */}
         <input
           type="email"
+          className="login-input"
           placeholder="Enter Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
+        {/* NAME */}
         <input
           type="text"
+          className="login-input"
           placeholder="Full Name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
 
-        <div className="password-field">
+        {/* PASSWORD */}
+        <div className="password-wrapper">
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="login-input"
           />
 
-          <span
-            className="toggle-password"
-            onClick={() => setShowPassword(!showPassword)}
-          >
+          <span onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? "🙈" : "👁"}
           </span>
         </div>
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
+
+        {/* ROLE */}
+        <select
+          className="login-input"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
           <option value="User">Employee</option>
           <option value="Admin">Admin</option>
         </select>
 
-        <button type="submit" className="primary" disabled={loading}>
+        {/* BUTTON */}
+        <button type="submit" className="login-btn" disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </button>
 
-        <p className="auth-link">
+        {/* LOGIN LINK */}
+        <p className="register-text">
           Already have an account? <Link to="/login">Login</Link>
         </p>
       </form>

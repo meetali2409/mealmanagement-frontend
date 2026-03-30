@@ -13,6 +13,7 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
+  // ✅ FETCH HISTORY (SAFE)
   const fetchHistory = useCallback(async () => {
     let url = `${API}/api/Meal/History?`;
 
@@ -32,58 +33,62 @@ function History() {
     try {
       const res = await fetch(url);
       const data = await res.json();
-      setRecords(data.records || []);
+
+      // 🔥 SAFE HANDLING
+      setRecords(Array.isArray(data) ? data : data.records || []);
       setTotal(data.totalAmount || 0);
     } catch (error) {
       console.error("Error fetching history:", error);
     }
   }, [fromDate, toDate, name, selectedMealType]);
 
+  // LOAD MEAL TYPES
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
-      .then((data) => setMealTypes(data))
+      .then((data) => setMealTypes(Array.isArray(data) ? data : data.data || []))
       .catch((err) => console.error(err));
   }, []);
+
   useEffect(() => {
     fetchHistory();
-  }, [fromDate, toDate, name, selectedMealType, fetchHistory]);
+  }, [fetchHistory]);
 
   return (
     <div className="containers">
-      <h2>Meal History</h2>
+      <h2>📊 Meal History</h2>
 
+      {/* FILTERS */}
       <div className="filter-section">
+
         <div className="filter-group">
           <label>From Date</label>
-
           <DatePicker
             selected={fromDate}
             onChange={(date) => setFromDate(date)}
             dateFormat="yyyy-MM-dd"
             customInput={
-              <input placeholder="Select Date" className="date-input" />
+              <input placeholder="From Date" className="date-input" />
             }
           />
         </div>
 
         <div className="filter-group">
           <label>To Date</label>
-
           <DatePicker
             selected={toDate}
             onChange={(date) => setToDate(date)}
             dateFormat="yyyy-MM-dd"
             customInput={
-              <input placeholder="Select Date" className="date-input" />
+              <input placeholder="To Date" className="date-input" />
             }
           />
         </div>
 
         <div className="filter-group">
-          <label>Employee Name</label>
+          <label>Employee</label>
           <input
-            placeholder="Enter Name"
+            placeholder="Search Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -95,7 +100,7 @@ function History() {
             value={selectedMealType}
             onChange={(e) => setSelectedMealType(e.target.value)}
           >
-            <option value="">All Meals</option>
+            <option value="">All</option>
             {mealTypes.map((m) => (
               <option key={m.mealTypeId} value={m.mealTypeId}>
                 {m.mealName}
@@ -103,8 +108,10 @@ function History() {
             ))}
           </select>
         </div>
+
       </div>
 
+      {/* TABLE */}
       <div className="table-wrapper">
         <table>
           <thead>
@@ -115,13 +122,18 @@ function History() {
               <th>Price</th>
             </tr>
           </thead>
+
           <tbody>
             {records.length > 0 ? (
               records.map((r, i) => (
                 <tr key={i}>
-                  <td>{r.fullName}</td>
-                  <td>{new Date(r.mealDate).toLocaleDateString()}</td>
-                  <td>{r.mealName}</td>
+                  <td>{r.fullName || r.employeeName}</td>
+                  <td>
+                    {r.mealDate
+                      ? new Date(r.mealDate).toLocaleDateString()
+                      : r.date?.split("T")[0]}
+                  </td>
+                  <td>{r.mealName || r.mealType?.mealName}</td>
                   <td>₹{r.fixedPrice}</td>
                 </tr>
               ))
@@ -134,8 +146,12 @@ function History() {
         </table>
       </div>
 
+      {/* TOTAL */}
       <div className="summary-box">
-        <h3>Total Amount: ₹{total}</h3>
+        <div className="summary-card">
+          <h4>Total Amount</h4>
+          <p>₹{total}</p>
+        </div>
       </div>
     </div>
   );
