@@ -11,33 +11,32 @@ function FoodManager() {
   const [mealTypeId, setMealTypeId] = useState("");
 
   const [editId, setEditId] = useState(null);
-const loadData = async () => {
-  try {
-    let foodData = [];
+  const loadData = async () => {
     try {
-      const foodRes = await fetch(`${API}/api/Food/All`);
-      const f = await foodRes.json();
-      foodData = Array.isArray(f) ? f : f.data || [];
-    } catch (e) {
-      console.error("Food error:", e);
-    }
-    let mealData = [];
-    try {
-      const mealRes = await fetch(`${API}/api/MealType/All`);
-      const m = await mealRes.json();
-      mealData = Array.isArray(m) ? m : m.data || [];
-    } catch (e) {
-      console.error("Meal error:", e);
-    }
+      let foodData = [];
+      try {
+        const foodRes = await fetch(`${API}/api/Food/All`);
+        const f = await foodRes.json();
+        foodData = Array.isArray(f) ? f : f.data || [];
+      } catch (e) {
+        console.error("Food error:", e);
+      }
+      let mealData = [];
+      try {
+        const mealRes = await fetch(`${API}/api/MealType/All`);
+        const m = await mealRes.json();
+        mealData = Array.isArray(m) ? m : m.data || [];
+      } catch (e) {
+        console.error("Meal error:", e);
+      }
 
-    setFoods(foodData);
-    setMealTypes(mealData);
-
-  } catch (err) {
-    console.error(err);
-    toast.error("Error loading data");
-  }
-};
+      setFoods(foodData);
+      setMealTypes(mealData);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error loading data");
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -50,9 +49,11 @@ const loadData = async () => {
     }
 
     const body = {
-      foodName,
-      mealTypeId: parseInt(mealTypeId),
+      foodName: foodName.trim(),
+      mealTypeId: Number(mealTypeId),
     };
+
+    console.log("BODY:", body);
 
     try {
       const url = editId
@@ -67,8 +68,11 @@ const loadData = async () => {
         body: JSON.stringify(body),
       });
 
+      const text = await res.text();
+      console.log("SERVER RESPONSE:", text);
+
       if (!res.ok) {
-        toast.error("Operation failed");
+        toast.error(text || "Operation failed");
         return;
       }
 
@@ -79,7 +83,8 @@ const loadData = async () => {
       setEditId(null);
 
       loadData();
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Error saving");
     }
   };
