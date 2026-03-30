@@ -11,7 +11,6 @@ function FoodManager() {
   const [mealTypeId, setMealTypeId] = useState("");
 
   const [editId, setEditId] = useState(null);
-
 const loadData = async () => {
   try {
     const foodRes = await fetch(`${API}/api/Food/All`);
@@ -20,8 +19,10 @@ const loadData = async () => {
     const mealRes = await fetch(`${API}/api/MealType/All`);
     const mealData = await mealRes.json();
 
+    console.log("Meal API:", mealData); 
+
     setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
-    setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
+    setMealTypes(Array.isArray(mealData) ? mealData : []);
 
   } catch (err) {
     console.error(err);
@@ -41,7 +42,7 @@ const loadData = async () => {
 
     const body = {
       foodName,
-      mealTypeId: parseInt(mealTypeId)
+      mealTypeId: parseInt(mealTypeId),
     };
 
     try {
@@ -69,7 +70,6 @@ const loadData = async () => {
       setEditId(null);
 
       loadData();
-
     } catch {
       toast.error("Error saving");
     }
@@ -90,7 +90,6 @@ const loadData = async () => {
 
       toast.success("Deleted");
       loadData();
-
     } catch {
       toast.error("Error deleting");
     }
@@ -106,7 +105,6 @@ const loadData = async () => {
     <div className="container">
       <h2>🍽 Food Manager</h2>
 
-   
       <div className="card">
         <input
           placeholder="Food Name"

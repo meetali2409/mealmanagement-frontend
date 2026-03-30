@@ -16,7 +16,6 @@ function AdminDashboard() {
 
   const [search, setSearch] = useState("");
 
-  // ================= LOAD =================
   const loadEmployees = async () => {
     try {
       const res = await fetch(`${API}/api/Employee/All`);
@@ -43,7 +42,6 @@ function AdminDashboard() {
     loadStats();
   }, []);
 
-  // ================= SAVE =================
   const saveEmployee = async () => {
     if (!empName.trim()) {
       toast.warning("Enter employee name");
@@ -61,7 +59,7 @@ function AdminDashboard() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          employeeId: editEmpId, // 🔥 FIX
+          employeeId: editEmpId, 
           fullName: empName,
         }),
       });
@@ -81,40 +79,37 @@ function AdminDashboard() {
     }
   };
 
-  // ================= DELETE =================
-  const deleteEmployee = async (id) => {
-    if (!window.confirm("Delete this employee?")) return;
+const deleteEmployee = async (id) => {
+  if (!window.confirm("Delete this employee?")) return;
 
-    try {
-      const res = await fetch(`${API}/api/Employee/Delete/${id}`, {
-        method: "DELETE",
-      });
+  try {
+    const res = await fetch(`${API}/api/Employee/Delete/${id}`, {
+      method: "DELETE",
+    });
 
-      if (!res.ok) {
-        toast.error("Delete failed");
-        return;
-      }
-
-      toast.success("Deleted");
-      loadEmployees();
-    } catch {
-      toast.error("Error deleting");
+    if (!res.ok) {
+      toast.error("Delete failed");
+      return;
     }
-  };
 
-  // ================= EDIT =================
+    toast.success("Deleted successfully");
+
+    await loadEmployees();
+
+  } catch {
+    toast.error("Error deleting");
+  }
+};
+
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
   };
-
-  // ================= LOGOUT =================
   const logout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  // ================= FILTER =================
   const filteredEmployees = employees.filter((e) =>
     e.fullName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -122,7 +117,6 @@ function AdminDashboard() {
   return (
     <div className="dashboard">
 
-      {/* HEADER */}
       <div className="dashboard-header">
         <h2>🚀 Admin Dashboard</h2>
 
@@ -143,7 +137,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* SUMMARY */}
       <div className="summary-box">
         <div className="summary-card">
           <h4>Total Employees</h4>
@@ -161,7 +154,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* EMPLOYEE SECTION */}
       <div className="card">
         <h3>👤 Employee Management</h3>
 

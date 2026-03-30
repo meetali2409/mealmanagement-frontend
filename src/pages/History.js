@@ -13,40 +13,48 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-  // ✅ FETCH HISTORY (SAFE)
   const fetchHistory = useCallback(async () => {
-    let url = `${API}/api/Meal/History?`;
-
-    if (fromDate) {
-      const f = fromDate.toLocaleDateString("en-CA");
-      url += `fromDate=${f}&`;
-    }
-
-    if (toDate) {
-      const t = toDate.toLocaleDateString("en-CA");
-      url += `toDate=${t}&`;
-    }
-
-    if (name) url += `name=${name}&`;
-    if (selectedMealType) url += `mealTypeId=${selectedMealType}&`;
-
     try {
+      let params = new URLSearchParams();
+
+      if (fromDate) {
+        params.append("fromDate", fromDate.toISOString().split("T")[0]);
+      }
+
+      if (toDate) {
+        params.append("toDate", toDate.toISOString().split("T")[0]);
+      }
+
+      if (name.trim()) {
+        params.append("name", name.trim());
+      }
+
+      if (selectedMealType) {
+        params.append("mealTypeId", selectedMealType);
+      }
+
+      const url = `${API}/api/Meal/History?${params.toString()}`;
+
+      console.log("API URL:", url);
+
       const res = await fetch(url);
       const data = await res.json();
 
-      // 🔥 SAFE HANDLING
-      setRecords(Array.isArray(data) ? data : data.records || []);
+      console.log("History Data:", data);
+
+      setRecords(data.records || []);
       setTotal(data.totalAmount || 0);
     } catch (error) {
       console.error("Error fetching history:", error);
     }
   }, [fromDate, toDate, name, selectedMealType]);
 
-  // LOAD MEAL TYPES
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
-      .then((data) => setMealTypes(Array.isArray(data) ? data : data.data || []))
+      .then((data) =>
+        setMealTypes(Array.isArray(data) ? data : data.data || []),
+      )
       .catch((err) => console.error(err));
   }, []);
 
@@ -58,9 +66,7 @@ function History() {
     <div className="containers">
       <h2>📊 Meal History</h2>
 
-      {/* FILTERS */}
       <div className="filter-section">
-
         <div className="filter-group">
           <label>From Date</label>
           <DatePicker
@@ -79,9 +85,7 @@ function History() {
             selected={toDate}
             onChange={(date) => setToDate(date)}
             dateFormat="yyyy-MM-dd"
-            customInput={
-              <input placeholder="To Date" className="date-input" />
-            }
+            customInput={<input placeholder="To Date" className="date-input" />}
           />
         </div>
 
@@ -108,10 +112,8 @@ function History() {
             ))}
           </select>
         </div>
-
       </div>
 
-      {/* TABLE */}
       <div className="table-wrapper">
         <table>
           <thead>
@@ -146,7 +148,6 @@ function History() {
         </table>
       </div>
 
-      {/* TOTAL */}
       <div className="summary-box">
         <div className="summary-card">
           <h4>Total Amount</h4>
