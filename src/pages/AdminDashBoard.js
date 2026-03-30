@@ -25,20 +25,13 @@ function AdminDashboard() {
   const [selectedDate, setSelectedDate] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [showHistory, setShowHistory] = useState(false);
 
-  useEffect(() => {
-    loadData();
-    loadStats();
-  }, []);
-
-  // ✅ FIXED LOAD DATA
   const loadData = async () => {
     try {
       const [empRes, mealRes, recRes] = await Promise.all([
         fetch(`${API}/api/Employee/All`),
         fetch(`${API}/api/MealType/All`),
-        fetch(`${API}/api/Meal/History`)
+        fetch(`${API}/api/Meal/History`),
       ]);
 
       const emp = await empRes.json();
@@ -47,9 +40,11 @@ function AdminDashboard() {
 
       setEmployees(Array.isArray(emp) ? emp : emp.data || []);
       setMeals(Array.isArray(meal) ? meal : meal.data || []);
-      setRecords(Array.isArray(rec) ? rec : rec.data || []);
 
-    } catch {
+      setRecords(Array.isArray(rec) ? rec : rec.records || []);
+
+    } catch (err) {
+      console.log("Error loading data:", err);
       toast.error("Error loading data");
     } finally {
       setLoading(false);
@@ -65,6 +60,21 @@ function AdminDashboard() {
       setTotalAmount(amount || 0);
     } catch {}
   };
+
+  useEffect(() => {
+    loadData();
+    loadStats();
+  }, []);
+
+  const filteredEmployees = employees.filter((e) =>
+    e.fullName?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredRecords = records.filter((r) => {
+    if (!selectedDate) return true;
+
+    return new Date(r.date).toLocaleDateString("en-CA") === selectedDate;
+  });
 
   const saveEmployee = async () => {
     if (!empName) return;
@@ -82,15 +92,21 @@ function AdminDashboard() {
     });
 
     toast.success(editEmpId ? "Updated" : "Added");
+
     setEmpName("");
     setEditEmpId(null);
     loadData();
   };
 
   const deleteEmployee = async (id) => {
-    await fetch(`${API}/api/Employee/${id}`, { method: "DELETE" });
+    await fetch(`${API}/api/Employee/Delete/${id}`, { method: "DELETE" });
     toast.success("Deleted");
     loadData();
+  };
+
+  const editEmployee = (emp) => {
+    setEmpName(emp.fullName);
+    setEditEmpId(emp.employeeId);
   };
 
   const saveMeal = async () => {
@@ -109,6 +125,7 @@ function AdminDashboard() {
     });
 
     toast.success(editMealId ? "Updated" : "Added");
+
     setMealName("");
     setPrice("");
     setEditMealId(null);
@@ -121,20 +138,11 @@ function AdminDashboard() {
     loadData();
   };
 
-  const filteredEmployees = Array.isArray(employees)
-    ? employees.filter(e =>
-        e.fullName?.toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
-
-  // ✅ FIXED DATE FILTER
-  const filteredRecords = Array.isArray(records)
-    ? records.filter(r =>
-        selectedDate
-          ? r.date?.split("T")[0] === selectedDate
-          : true
-      )
-    : [];
+  const editMeal = (meal) => {
+    setMealName(meal.mealName);
+    setPrice(meal.fixedPrice);
+    setEditMealId(meal.mealTypeId);
+  };
 
   const logout = () => {
     localStorage.clear();
@@ -146,149 +154,100 @@ function AdminDashboard() {
   return (
     <div className="dashboard">
 
-      {/* HEADER */}
-      <div className="dashboard-header">
-        <h2>Admin Dashboard</h2>
+      <h2>Admin Dashboard</h2>
 
-        <div>
-          <button onClick={() => setShowHistory(!showHistory)}>
-            {showHistory ? "Back" : "View History"}
-          </button>
+      <div className="summary-box">
+        <div className="summary-card"><h4>Employees</h4><p>{employees.length}</p></div>
+        <div className="summary-card"><h4>Meals</h4><p>{meals.length}</p></div>
+        <div className="summary-card"><h4>Today Plates</h4><p>{todayPlates}</p></div>
+        <div className="summary-card"><h4>Revenue</h4><p>₹{totalAmount}</p></div>
+      </div>
 
-          <button className="logout-btn" onClick={logout}>
-            Logout
-          </button>
+      <div className="card">
+        <h3>👤 Employees</h3>
+
+        <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input placeholder="Employee Name" value={empName} onChange={(e) => setEmpName(e.target.value)} />
+
+        <button className="primary" onClick={saveEmployee}>
+          {editEmpId ? "Update" : "Add"}
+        </button>
+
+        <div className="table-wrapper">
+          <table>
+            <thead><tr><th>Name</th><th>Action</th></tr></thead>
+            <tbody>
+              {filteredEmployees.map((e) => (
+                <tr key={e.employeeId}>
+                  <td>{e.fullName}</td>
+                  <td>
+                    <button onClick={() => editEmployee(e)}>Edit</button>
+                    <button onClick={() => deleteEmployee(e.employeeId)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* HISTORY VIEW */}
-      {showHistory ? (
-        <div className="card full">
-          <h3>📊 Meal History</h3>
+      <div className="card">
+        <h3>🍽 Meal Types</h3>
 
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
+        <input placeholder="Meal Name" value={mealName} onChange={(e) => setMealName(e.target.value)} />
+        <input placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
 
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Meal</th>
-                  <th>Date</th>
+        <button className="primary" onClick={saveMeal}>
+          {editMealId ? "Update" : "Add"}
+        </button>
+
+        <div className="table-wrapper">
+          <table>
+            <thead><tr><th>Meal</th><th>Price</th><th>Action</th></tr></thead>
+            <tbody>
+              {meals.map((m) => (
+                <tr key={m.mealTypeId}>
+                  <td>{m.mealName}</td>
+                  <td>₹{m.fixedPrice}</td>
+                  <td>
+                    <button onClick={() => editMeal(m)}>Edit</button>
+                    <button onClick={() => deleteMeal(m.mealTypeId)}>Delete</button>
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody>
-                {filteredRecords.length > 0 ? (
-                  filteredRecords.map((r) => (
-                    <tr key={r.id}>
-                      <td>{r.employee?.fullName || r.employeeName}</td>
-                      <td>{r.mealType?.mealName || r.mealName}</td>
-                      <td>{r.date?.split("T")[0]}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3">No records found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <>
-          {/* STATS */}
-          <div className="summary-box">
-            <div className="summary-card"><h4>👤 Employees</h4><p>{employees.length}</p></div>
-            <div className="summary-card"><h4>🍽 Meals</h4><p>{meals.length}</p></div>
-            <div className="summary-card"><h4>📊 Plates</h4><p>{todayPlates}</p></div>
-            <div className="summary-card"><h4>💰 Revenue</h4><p>₹{totalAmount}</p></div>
-          </div>
+      </div>
 
-          <div className="dashboard-grid">
+      <div className="card">
+        <h3>📊 History</h3>
 
-            {/* EMPLOYEES */}
-            <div className="card">
-              <h3>👤 Employees</h3>
+        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
 
-              <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
-              <input placeholder="Employee Name" value={empName} onChange={(e) => setEmpName(e.target.value)} />
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Meal</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+              {filteredRecords.length > 0 ? (
+                filteredRecords.map((r, i) => (
+                  <tr key={i}>
+                    <td>{r.employee?.fullName || "N/A"}</td>
+                    <td>{r.mealType?.mealName || "N/A"}</td>
+                    <td>{new Date(r.date).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="3">No Records Found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-              <button className="primary" onClick={saveEmployee}>
-                {editEmpId ? "Update" : "Add"}
-              </button>
-
-              <div className="table-wrapper">
-                <table>
-                  <thead>
-                    <tr><th>Name</th><th>Action</th></tr>
-                  </thead>
-                  <tbody>
-                    {filteredEmployees.map(e => (
-                      <tr key={e.employeeId}>
-                        <td>{e.fullName}</td>
-                        <td>
-                          <div className="table-actions">
-                            <button className="edit-btn" onClick={() => {
-                              setEmpName(e.fullName);
-                              setEditEmpId(e.employeeId);
-                            }}>Edit</button>
-                            <button className="delete-btn" onClick={() => deleteEmployee(e.employeeId)}>Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* MEALS */}
-            <div className="card">
-              <h3>🍽 Meal Types</h3>
-
-              <input placeholder="Meal Name" value={mealName} onChange={(e) => setMealName(e.target.value)} />
-              <input placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
-
-              <button className="primary" onClick={saveMeal}>
-                {editMealId ? "Update" : "Add"}
-              </button>
-
-              <div className="table-wrapper">
-                <table>
-                  <thead>
-                    <tr><th>Meal</th><th>Price</th><th>Action</th></tr>
-                  </thead>
-                  <tbody>
-                    {meals.map(m => (
-                      <tr key={m.mealTypeId}>
-                        <td>{m.mealName}</td>
-                        <td>₹{m.fixedPrice}</td>
-                        <td>
-                          <div className="table-actions">
-                            <button className="edit-btn" onClick={() => {
-                              setMealName(m.mealName);
-                              setPrice(m.fixedPrice);
-                              setEditMealId(m.mealTypeId);
-                            }}>Edit</button>
-                            <button className="delete-btn" onClick={() => deleteMeal(m.mealTypeId)}>Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </>
-      )}
+      <button className="accent" onClick={logout}>Logout</button>
     </div>
   );
 }
