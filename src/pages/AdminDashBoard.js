@@ -9,7 +9,6 @@ function AdminDashboard() {
 
   const [employees, setEmployees] = useState([]);
   const [meals, setMeals] = useState([]);
-  const [records, setRecords] = useState([]);
 
   const [empName, setEmpName] = useState("");
   const [mealName, setMealName] = useState("");
@@ -22,32 +21,16 @@ function AdminDashboard() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   const [search, setSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-
-  const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
-      const [empRes, mealRes, recRes] = await Promise.all([
-        fetch(`${API}/api/Employee/All`),
-        fetch(`${API}/api/MealType/All`),
-        fetch(`${API}/api/Meal/History`),
-      ]);
-
-      const emp = await empRes.json();
-      const meal = await mealRes.json();
-      const rec = await recRes.json();
+      const emp = await fetch(`${API}/api/Employee/All`).then(r => r.json());
+      const meal = await fetch(`${API}/api/MealType/All`).then(r => r.json());
 
       setEmployees(Array.isArray(emp) ? emp : emp.data || []);
       setMeals(Array.isArray(meal) ? meal : meal.data || []);
-
-      setRecords(Array.isArray(rec) ? rec : rec.records || []);
-
-    } catch (err) {
-      console.log("Error loading data:", err);
+    } catch {
       toast.error("Error loading data");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -66,16 +49,6 @@ function AdminDashboard() {
     loadStats();
   }, []);
 
-  const filteredEmployees = employees.filter((e) =>
-    e.fullName?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const filteredRecords = records.filter((r) => {
-    if (!selectedDate) return true;
-
-    return new Date(r.date).toLocaleDateString("en-CA") === selectedDate;
-  });
-
   const saveEmployee = async () => {
     if (!empName) return;
 
@@ -91,7 +64,7 @@ function AdminDashboard() {
       body: JSON.stringify({ fullName: empName }),
     });
 
-    toast.success(editEmpId ? "Updated" : "Added");
+    toast.success(editEmpId ? "Employee Updated" : "Employee Added");
 
     setEmpName("");
     setEditEmpId(null);
@@ -124,7 +97,7 @@ function AdminDashboard() {
       body: JSON.stringify({ mealName, fixedPrice: price }),
     });
 
-    toast.success(editMealId ? "Updated" : "Added");
+    toast.success(editMealId ? "Meal Updated" : "Meal Added");
 
     setMealName("");
     setPrice("");
@@ -149,25 +122,63 @@ function AdminDashboard() {
     navigate("/login");
   };
 
-  if (loading) return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+  const filteredEmployees = employees.filter((e) =>
+    e.fullName?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="dashboard">
 
-      <h2>Admin Dashboard</h2>
+      <div className="dashboard-header">
+        <h2>Admin Dashboard</h2>
+
+        <div>
+          <button onClick={() => navigate("/history")}>
+            📊 View History
+          </button>
+
+          <button className="logout-btn" onClick={logout}>
+            Logout
+          </button>
+        </div>
+      </div>
 
       <div className="summary-box">
-        <div className="summary-card"><h4>Employees</h4><p>{employees.length}</p></div>
-        <div className="summary-card"><h4>Meals</h4><p>{meals.length}</p></div>
-        <div className="summary-card"><h4>Today Plates</h4><p>{todayPlates}</p></div>
-        <div className="summary-card"><h4>Revenue</h4><p>₹{totalAmount}</p></div>
+        <div className="summary-card">
+          <h4>Employees</h4>
+          <p>{employees.length}</p>
+        </div>
+
+        <div className="summary-card">
+          <h4>Meals</h4>
+          <p>{meals.length}</p>
+        </div>
+
+        <div className="summary-card">
+          <h4>Today's Plates</h4>
+          <p>{todayPlates}</p>
+        </div>
+
+        <div className="summary-card">
+          <h4>Revenue</h4>
+          <p>₹{totalAmount}</p>
+        </div>
       </div>
 
       <div className="card">
         <h3>👤 Employees</h3>
 
-        <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        <input placeholder="Employee Name" value={empName} onChange={(e) => setEmpName(e.target.value)} />
+        <input
+          placeholder="Search Employee"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <input
+          placeholder="Employee Name"
+          value={empName}
+          onChange={(e) => setEmpName(e.target.value)}
+        />
 
         <button className="primary" onClick={saveEmployee}>
           {editEmpId ? "Update" : "Add"}
@@ -175,14 +186,22 @@ function AdminDashboard() {
 
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Name</th><th>Action</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
             <tbody>
               {filteredEmployees.map((e) => (
                 <tr key={e.employeeId}>
                   <td>{e.fullName}</td>
                   <td>
                     <button onClick={() => editEmployee(e)}>Edit</button>
-                    <button onClick={() => deleteEmployee(e.employeeId)}>Delete</button>
+                    <button onClick={() => deleteEmployee(e.employeeId)}>
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -190,12 +209,20 @@ function AdminDashboard() {
           </table>
         </div>
       </div>
-
       <div className="card">
         <h3>🍽 Meal Types</h3>
 
-        <input placeholder="Meal Name" value={mealName} onChange={(e) => setMealName(e.target.value)} />
-        <input placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <input
+          placeholder="Meal Name"
+          value={mealName}
+          onChange={(e) => setMealName(e.target.value)}
+        />
+
+        <input
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
 
         <button className="primary" onClick={saveMeal}>
           {editMealId ? "Update" : "Add"}
@@ -203,7 +230,14 @@ function AdminDashboard() {
 
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Meal</th><th>Price</th><th>Action</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Meal</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
             <tbody>
               {meals.map((m) => (
                 <tr key={m.mealTypeId}>
@@ -211,7 +245,9 @@ function AdminDashboard() {
                   <td>₹{m.fixedPrice}</td>
                   <td>
                     <button onClick={() => editMeal(m)}>Edit</button>
-                    <button onClick={() => deleteMeal(m.mealTypeId)}>Delete</button>
+                    <button onClick={() => deleteMeal(m.mealTypeId)}>
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -220,34 +256,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <div className="card">
-        <h3>📊 History</h3>
-
-        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
-
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr><th>Name</th><th>Meal</th><th>Date</th></tr>
-            </thead>
-            <tbody>
-              {filteredRecords.length > 0 ? (
-                filteredRecords.map((r, i) => (
-                  <tr key={i}>
-                    <td>{r.employee?.fullName || "N/A"}</td>
-                    <td>{r.mealType?.mealName || "N/A"}</td>
-                    <td>{new Date(r.date).toLocaleDateString()}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr><td colSpan="3">No Records Found</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <button className="accent" onClick={logout}>Logout</button>
     </div>
   );
 }
