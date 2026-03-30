@@ -11,24 +11,24 @@ function FoodManager() {
   const [mealTypeId, setMealTypeId] = useState("");
 
   const [editId, setEditId] = useState(null);
-const loadData = async () => {
-  try {
-    const foodRes = await fetch(`${API}/api/Food/All`);
-    const foodData = await foodRes.json();
+  const loadData = async () => {
+    try {
+      const foodRes = await fetch(`${API}/api/Food/All`);
+      const foodData = await foodRes.json();
 
-    const mealRes = await fetch(`${API}/api/MealType/All`);
-    const mealData = await mealRes.json();
+      const mealRes = await fetch(`${API}/api/MealType/All`);
+      const mealData = await mealRes.json();
 
-    console.log("Meal API:", mealData); 
+      console.log("Meal API:", mealData);
 
-    setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
-    setMealTypes(Array.isArray(mealData) ? mealData : []);
+      setFoods(Array.isArray(foodData) ? foodData : foodData.data || []);
 
-  } catch (err) {
-    console.error(err);
-    toast.error("Error loading data");
-  }
-};
+      setMealTypes(Array.isArray(mealData) ? mealData : mealData.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error loading data");
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -134,7 +134,6 @@ const loadData = async () => {
         </button>
       </div>
 
-      {/* LIST */}
       <div className="card">
         <h3>Food List</h3>
 
