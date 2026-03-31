@@ -4,71 +4,52 @@ import { toast } from "react-toastify";
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
 function Dashboard() {
-  const [meals, setMeals] = useState([]);
-  const [selectedMeals, setSelectedMeals] = useState([]);
-  const [totalPlates, setTotalPlates] = useState(0);
-  const [totalHistoryPlates, setTotalHistoryPlates] = useState(0);
-  const [totalAmount, setTotalAmount] = useState(0);
-
   const user = JSON.parse(localStorage.getItem("employee"));
 
-  // ================= LOAD =================
+  const [mealTypes, setMealTypes] = useState([]);
+  const [foods, setFoods] = useState([]);
+
+  const [selectedMeal, setSelectedMeal] = useState("");
+  const [selectedFoods, setSelectedFoods] = useState([]);
+
+  const [todayPlates, setTodayPlates] = useState(0);
+
   useEffect(() => {
-    fetchMeals();
-    fetchTodayPlates();
-    fetchUserStats();
+    fetch(`${API}/api/MealType/All`)
+      .then((res) => res.json())
+      .then((data) => setMealTypes(data || []));
   }, []);
 
-  const fetchMeals = async () => {
-    try {
-      const res = await fetch(`${API}/api/MealType/All`);
-      const data = await res.json();
-      setMeals(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      toast.error("Error loading meals");
+  useEffect(() => {
+    if (!selectedMeal) return;
+
+    fetch(`${API}/api/Food/ByMeal/${selectedMeal}`)
+      .then((res) => res.json())
+      .then((data) => setFoods(data || []));
+  }, [selectedMeal]);
+
+  useEffect(() => {
+    fetch(`${API}/api/Meal/TodayTotalPlates`)
+      .then((res) => res.json())
+      .then((data) => setTodayPlates(data || 0));
+  }, []);
+
+  const toggleFood = (id) => {
+    if (selectedFoods.includes(id)) {
+      setSelectedFoods(selectedFoods.filter((f) => f !== id));
+    } else {
+      setSelectedFoods([...selectedFoods, id]);
     }
   };
 
-  const fetchTodayPlates = async () => {
-    try {
-      const res = await fetch(`${API}/api/Meal/TodayTotalPlates`);
-      const data = await res.json();
-      setTotalPlates(data || 0);
-    } catch {}
-  };
-
-  const fetchUserStats = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/Meal/UserSummary/${user.employeeId}`
-      );
-      const data = await res.json();
-
-      setTotalHistoryPlates(data.totalPlates || 0);
-      setTotalAmount(data.totalAmount || 0);
-    } catch {
-      console.log("Stats error");
-    }
-  };
-
-  // ================= MULTI SELECT =================
-  const toggleMeal = (id) => {
-    setSelectedMeals((prev) =>
-      prev.includes(id)
-        ? prev.filter((m) => m !== id)
-        : [...prev, id]
-    );
-  };
-
-  // ================= SUBMIT =================
-  const handleSubmit = async () => {
-    if (selectedMeals.length === 0) {
-      toast.warning("Select at least one meal");
+  const handleAddMeal = async () => {
+    if (!selectedMeal || selectedFoods.length === 0) {
+      toast.warning("Select meal and at least one food");
       return;
     }
 
     try {
-      for (let mealId of selectedMeals) {
+      for (let foodId of selectedFoods) {
         await fetch(`${API}/api/Meal/Add`, {
           method: "POST",
           headers: {
@@ -76,67 +57,67 @@ function Dashboard() {
           },
           body: JSON.stringify({
             employeeId: user.employeeId,
-            mealTypeId: mealId,
+            mealTypeId: parseInt(selectedMeal),
+            foodId: foodId,
           }),
         });
       }
 
-      toast.success("Meal Added!");
-
-      setSelectedMeals([]);
-      fetchTodayPlates();
-      fetchUserStats();
-
-    } catch {
+      toast.success("Meals Added 🍽");
+      setSelectedFoods([]);
+    } catch (err) {
+      console.error(err);
       toast.error("Error adding meal");
     }
   };
 
   return (
-    <div className="dashboard">
+    <div className="container">
+      <h2>🍽 Welcome, {user?.fullName}</h2>
 
-      <h2>👋 Welcome, {user?.fullName}</h2>
-
-      {/* ===== SUMMARY ===== */}
-      <div className="summary-box">
-        <div className="summary-card">
-          <h4>Today's Plates</h4>
-          <p>{totalPlates}</p>
-        </div>
-
-        <div className="summary-card">
-          <h4>Total Plates</h4>
-          <p>{totalHistoryPlates}</p>
-        </div>
-
-        <div className="summary-card">
-          <h4>Total Amount</h4>
-          <p>₹{totalAmount}</p>
-        </div>
+      <div className="summary-card">
+        <h4>Today's Plates</h4>
+        <p>{todayPlates}</p>
       </div>
 
-      {/* ===== MEAL SELECT ===== */}
-      <div className="card">
-        <h3>🍽 Select Meal</h3>
+      <select
+        value={selectedMeal}
+        onChange={(e) => {
+          setSelectedMeal(e.target.value);
+          setSelectedFoods([]); 
+        }}
+      >
+        <option value="">Select Meal Type</option>
+        {mealTypes.map((m) => (
+          <option key={m.mealTypeId} value={m.mealTypeId}>
+            {m.mealName}
+          </option>
+        ))}
+      </select>
 
+      {selectedMeal && (
         <div className="meal-grid">
-          {meals.map((m) => (
-            <div
-              key={m.mealTypeId}
-              className={`meal-item ${
-                selectedMeals.includes(m.mealTypeId) ? "active" : ""
-              }`}
-              onClick={() => toggleMeal(m.mealTypeId)}
-            >
-              <h4>{m.mealName}</h4>
-            </div>
-          ))}
+          {foods.length > 0 ? (
+            foods.map((f) => (
+              <div
+                key={f.foodId}
+                className={`meal-card ${
+                  selectedFoods.includes(f.foodId) ? "active" : ""
+                }`}
+                onClick={() => toggleFood(f.foodId)}
+              >
+                {f.foodName}
+              </div>
+            ))
+          ) : (
+            <p>No food available</p>
+          )}
         </div>
+      )}
 
-        <button className="primary" onClick={handleSubmit}>
-          Add Meal
-        </button>
-      </div>
+      <button className="primary" onClick={handleAddMeal}>
+        Add Meal
+      </button>
     </div>
   );
 }
