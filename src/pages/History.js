@@ -13,6 +13,11 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
+  const [editModal, setEditModal] = useState(false);
+  const [editRecord, setEditRecord] = useState(null);
+  const [foodOptions, setFoodOptions] = useState([]);
+  const [selectedFoods, setSelectedFoods] = useState([]);
+
   const fetchHistory = async () => {
     try {
       let params = new URLSearchParams();
@@ -50,11 +55,12 @@ function History() {
             acc[key] = {
               ...item,
               mealDate: dateOnly,
+              employeeId: item.employeeId,
+              mealTypeId: item.mealTypeId,
               foodNames: [item.foodName],
             };
           } else {
             acc[key].foodNames.push(item.foodName);
-
             acc[key].foodNames = [...new Set(acc[key].foodNames)];
           }
 
@@ -65,16 +71,14 @@ function History() {
       setRecords(grouped);
       setTotal(data.totalAmount || 0);
     } catch (error) {
-      console.error("Error fetching history:", error);
+      console.error(error);
     }
   };
 
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
-      .then((data) =>
-        setMealTypes(Array.isArray(data) ? data : data.data || [])
-      )
+      .then((data) => setMealTypes(data))
       .catch((err) => console.error(err));
   }, []);
 
@@ -82,21 +86,18 @@ function History() {
     fetchHistory();
   }, [fromDate, toDate, name, selectedMealType]);
 
-  const handleEdit = (record) => {
-    console.log("Edit:", record);
-
-    setSelectedMealType(record.mealTypeId);
-    setName(record.fullName);
-  };
-  const handleDeleteGroup = async (record) => {
+  const handleDelete = async (record) => {
     if (!window.confirm("Delete this meal?")) return;
 
-    try {
-      const url = `${API}/api/Meal/DeleteByGroup?employeeId=${record.employeeId}&mealTypeId=${record.mealTypeId}&date=${record.mealDate}`;
+    const formattedDate = new Date(record.mealDate)
+      .toISOString()
+      .split("T")[0];
 
-      const res = await fetch(url, {
-        method: "DELETE",
-      });
+    try {
+      const res = await fetch(
+        `${API}/api/Meal/DeleteByGroup?employeeId=${record.employeeId}&mealTypeId=${record.mealTypeId}&date=${formattedDate}`,
+        { method: "DELETE" }
+      );
 
       if (!res.ok) {
         alert("Delete failed");
@@ -109,129 +110,147 @@ function History() {
       console.error(err);
     }
   };
-  const handleDelete = async (id) => {
-    console.log("Deleting ID:", id);
 
-    if (!window.confirm("Delete this record?")) return;
+  const handleEdit = async (record) => {
+    setEditRecord(record);
+    setEditModal(true);
 
-    try {
-      const res = await fetch(`${API}/api/Meal/Delete/${id}`, {
-        method: "DELETE",
-      });
+    const res = await fetch(
+      `${API}/api/Food/ByMeal/${record.mealTypeId}`
+    );
+    const data = await res.json();
 
-      const text = await res.text();
-      console.log("Response:", text);
+    setFoodOptions(data);
+    setSelectedFoods(record.foodNames || []);
+  };
 
-      if (!res.ok) {
-        alert("Delete failed");
-        return;
-      }
-
-      alert("Deleted successfully");
-      fetchHistory();
-    } catch (err) {
-      console.error("Delete error:", err);
+  const toggleFood = (foodName) => {
+    if (selectedFoods.includes(foodName)) {
+      setSelectedFoods(selectedFoods.filter((f) => f !== foodName));
+    } else {
+      setSelectedFoods([...selectedFoods, foodName]);
     }
   };
+
+  const handleUpdate = async () => {
+    const formattedDate = new Date(editRecord.mealDate)
+      .toISOString()
+      .split("T")[0];
+
+   
+    await fetch(
+      `${API}/api/Meal/DeleteByGroup?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&date=${formattedDate}`,
+      { method: "DELETE" }
+    );
+
+    for (let foodName of selectedFoods) {
+      const food = foodOptions.find((f) => f.foodName === foodName);
+
+      await fetch(`${API}/api/Meal/Add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: editRecord.employeeId,
+          mealTypeId: editRecord.mealTypeId,
+          foodId: food.foodId,
+        }),
+      });
+    }
+
+    alert("Updated successfully");
+    setEditModal(false);
+    fetchHistory();
+  };
+
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
 
       <div className="history-filters">
-        <div>
-          <label>From Date</label>
-          <DatePicker
-            selected={fromDate}
-            onChange={(date) => setFromDate(date)}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="From Date"
-          />
-        </div>
+        <DatePicker
+          selected={fromDate}
+          onChange={(d) => setFromDate(d)}
+          placeholderText="From Date"
+        />
 
-        <div>
-          <label>To Date</label>
-          <DatePicker
-            selected={toDate}
-            onChange={(date) => setToDate(date)}
-            dateFormat="yyyy-MM-dd"
-            placeholderText="To Date"
-          />
-        </div>
+        <DatePicker
+          selected={toDate}
+          onChange={(d) => setToDate(d)}
+          placeholderText="To Date"
+        />
 
-        <div>
-          <label>Employee</label>
-          <input
-            placeholder="Search Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+        <input
+          placeholder="Search Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <div>
-          <label>Meal Type</label>
-          <select
-            value={selectedMealType}
-            onChange={(e) => setSelectedMealType(e.target.value)}
-          >
-            <option value="">All</option>
-            {mealTypes.map((m) => (
-              <option key={m.mealTypeId} value={m.mealTypeId}>
-                {m.mealName}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={selectedMealType}
+          onChange={(e) => setSelectedMealType(e.target.value)}
+        >
+          <option value="">All</option>
+          {mealTypes.map((m) => (
+            <option key={m.mealTypeId} value={m.mealTypeId}>
+              {m.mealName}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Date</th>
-              <th>Meal</th>
-              <th>Food</th>
-              <th>Price</th>
-              <th>Action</th>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Meal</th>
+            <th>Food</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {records.map((r, i) => (
+            <tr key={i}>
+              <td>{r.fullName}</td>
+              <td>{new Date(r.mealDate).toLocaleDateString()}</td>
+              <td>{r.mealName}</td>
+              <td>{r.foodNames.join(", ")}</td>
+              <td>₹{r.fixedPrice}</td>
+              <td>
+                <button onClick={() => handleDelete(r)}>Delete</button>
+                <button onClick={() => handleEdit(r)}>Edit</button>
+              </td>
             </tr>
-          </thead>
+          ))}
+        </tbody>
+      </table>
 
-          <tbody>
-            {records.length > 0 ? (
-              records.map((r, i) => (
-                <tr key={i}>
-                  <td>{r.fullName}</td>
+      <h3>Total Amount: ₹{total}</h3>
 
-                  <td>
-                    {new Date(r.mealDate).toLocaleDateString()}
-                  </td>
+      {editModal && (
+        <div className="modal">
+          <h3>Edit Meal</h3>
 
-                  <td>{r.mealName}</td>
+          {foodOptions.map((f) => (
+            <div key={f.foodId}>
+              <input
+                type="checkbox"
+                checked={selectedFoods.includes(f.foodName)}
+                onChange={() => toggleFood(f.foodName)}
+              />
+              {f.foodName}
+            </div>
+          ))}
 
-                  <td>{r.foodNames.join(", ")}</td>
-
-                  <td>₹{r.fixedPrice}</td>
-                  <td>
-                    <button onClick={() => handleDeleteGroup(r)}>Delete</button> 
-                    <button onClick={() => handleEdit(r)}>Edit</button>
-                  
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5">No Records Found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div className="summary-box">
-        <div className="summary-card">
-          <h4>Total Amount</h4>
-          <p>₹{total}</p>
+          <br />
+          <button onClick={handleUpdate}>Save</button>
+          <button onClick={() => setEditModal(false)}>Cancel</button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
