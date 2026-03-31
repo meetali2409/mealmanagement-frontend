@@ -13,42 +13,42 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-  const fetchHistory = useCallback(async () => {
-    try {
-      let params = new URLSearchParams();
+const fetchHistory = async () => {
+  try {
+    let params = new URLSearchParams();
 
-      if (fromDate) {
-        params.append("fromDate", fromDate.toISOString().split("T")[0]);
-      }
-
-      if (toDate) {
-        params.append("toDate", toDate.toISOString().split("T")[0]);
-      }
-
-      if (name.trim()) {
-        params.append("name", name.trim());
-      }
-
-      if (selectedMealType) {
-        params.append("mealTypeId", selectedMealType);
-      }
-
-      const url = `${API}/api/Meal/History?${params.toString()}`;
-
-      console.log("API URL:", url);
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      console.log("History Data:", data);
-
-      setRecords(data.records || []);
-      setTotal(data.totalAmount || 0);
-    } catch (error) {
-      console.error("Error fetching history:", error);
+    if (fromDate) {
+      params.append("fromDate", fromDate.toISOString().split("T")[0]);
     }
-  }, [fromDate, toDate, name, selectedMealType]);
 
+    if (toDate) {
+      params.append("toDate", toDate.toISOString().split("T")[0]);
+    }
+
+    if (name.trim()) {
+      params.append("name", name.trim());
+    }
+
+    if (selectedMealType) {
+      params.append("mealTypeId", selectedMealType);
+    }
+
+    const url = `${API}/api/Meal/History?${params.toString()}`;
+
+    console.log("API URL:", url);
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    console.log("History Data:", data);
+
+    setRecords(data.records || []);
+    setTotal(data.totalAmount || 0);
+
+  } catch (error) {
+    console.error("Error fetching history:", error);
+  }
+};
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
@@ -60,7 +60,7 @@ function History() {
 
   useEffect(() => {
     fetchHistory();
-  }, [fetchHistory]);
+  }, [fromDate, toDate, name, selectedMealType]);
 
   return (
     <div className="containers">
