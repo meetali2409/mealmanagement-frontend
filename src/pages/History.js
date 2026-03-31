@@ -38,7 +38,24 @@ function History() {
       const res = await fetch(url);
       const data = await res.json();
 
-      setRecords(data.records || []);
+      const grouped = Object.values(
+        (data.records || []).reduce((acc, item) => {
+          const key = `${item.fullName}_${item.mealDate}_${item.mealName}`;
+
+          if (!acc[key]) {
+            acc[key] = {
+              ...item,
+              foodNames: [item.foodName],
+            };
+          } else {
+            acc[key].foodNames.push(item.foodName);
+          }
+
+          return acc;
+        }, {})
+      );
+
+      setRecords(grouped);
       setTotal(data.totalAmount || 0);
     } catch (error) {
       console.error("Error fetching history:", error);
@@ -61,7 +78,6 @@ function History() {
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
-
       <div className="history-filters">
         <div>
           <label>From Date</label>
@@ -127,14 +143,12 @@ function History() {
                   <td>{r.fullName}</td>
 
                   <td>
-                    {r.mealDate
-                      ? new Date(r.mealDate).toLocaleDateString()
-                      : ""}
+                    {new Date(r.mealDate).toLocaleDateString()}
                   </td>
 
                   <td>{r.mealName}</td>
 
-                  <td>{r.foodName}</td>
+                  <td>{r.foodNames.join(", ")}</td>
 
                   <td>₹{r.fixedPrice}</td>
                 </tr>
@@ -147,7 +161,6 @@ function History() {
           </tbody>
         </table>
       </div>
-
       <div className="summary-box">
         <div className="summary-card">
           <h4>Total Amount</h4>
