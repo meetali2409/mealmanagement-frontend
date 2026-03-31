@@ -82,6 +82,29 @@ function History() {
     fetchHistory();
   }, [fromDate, toDate, name, selectedMealType]);
 
+  const handleEdit = (record) => {
+    setSelectedMealType(record.mealTypeId);
+    setName(record.fullName);
+  };
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this record?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/Meal/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        alert("Delete failed");
+        return;
+      }
+
+      alert("Deleted successfully");
+      fetchHistory();
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
@@ -141,6 +164,7 @@ function History() {
               <th>Meal</th>
               <th>Food</th>
               <th>Price</th>
+              <th>Action</th>
             </tr>
           </thead>
 
@@ -159,6 +183,10 @@ function History() {
                   <td>{r.foodNames.join(", ")}</td>
 
                   <td>₹{r.fixedPrice}</td>
+                  <td>
+                    <button onClick={() => handleDelete(r.id)}>Delete</button>
+                    <button onClick={() => handleEdit(r.id)}>Edit</button>
+                  </td>
                 </tr>
               ))
             ) : (
