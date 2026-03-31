@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -13,47 +13,43 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-const fetchHistory = async () => {
-  try {
-    let params = new URLSearchParams();
+  const fetchHistory = async () => {
+    try {
+      let params = new URLSearchParams();
 
-    if (fromDate) {
-      params.append("fromDate", fromDate.toISOString().split("T")[0]);
+      if (fromDate) {
+        params.append("fromDate", fromDate.toISOString().split("T")[0]);
+      }
+
+      if (toDate) {
+        params.append("toDate", toDate.toISOString().split("T")[0]);
+      }
+
+      if (name.trim()) {
+        params.append("name", name.trim());
+      }
+
+      if (selectedMealType) {
+        params.append("mealTypeId", selectedMealType);
+      }
+
+      const url = `${API}/api/Meal/History?${params.toString()}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      setRecords(data.records || []);
+      setTotal(data.totalAmount || 0);
+    } catch (error) {
+      console.error("Error fetching history:", error);
     }
+  };
 
-    if (toDate) {
-      params.append("toDate", toDate.toISOString().split("T")[0]);
-    }
-
-    if (name.trim()) {
-      params.append("name", name.trim());
-    }
-
-    if (selectedMealType) {
-      params.append("mealTypeId", selectedMealType);
-    }
-
-    const url = `${API}/api/Meal/History?${params.toString()}`;
-
-    console.log("API URL:", url);
-
-    const res = await fetch(url);
-    const data = await res.json();
-
-    console.log("History Data:", data);
-
-    setRecords(data.records || []);
-    setTotal(data.totalAmount || 0);
-
-  } catch (error) {
-    console.error("Error fetching history:", error);
-  }
-};
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
       .then((data) =>
-        setMealTypes(Array.isArray(data) ? data : data.data || []),
+        setMealTypes(Array.isArray(data) ? data : data.data || [])
       )
       .catch((err) => console.error(err));
   }, []);
@@ -63,33 +59,31 @@ const fetchHistory = async () => {
   }, [fromDate, toDate, name, selectedMealType]);
 
   return (
-    <div className="containers">
+    <div className="container">
       <h2>📊 Meal History</h2>
 
-      <div className="filter-section">
-        <div className="filter-group">
+      <div className="history-filters">
+        <div>
           <label>From Date</label>
           <DatePicker
             selected={fromDate}
             onChange={(date) => setFromDate(date)}
             dateFormat="yyyy-MM-dd"
-            customInput={
-              <input placeholder="From Date" className="date-input" />
-            }
+            placeholderText="From Date"
           />
         </div>
 
-        <div className="filter-group">
+        <div>
           <label>To Date</label>
           <DatePicker
             selected={toDate}
             onChange={(date) => setToDate(date)}
             dateFormat="yyyy-MM-dd"
-            customInput={<input placeholder="To Date" className="date-input" />}
+            placeholderText="To Date"
           />
         </div>
 
-        <div className="filter-group">
+        <div>
           <label>Employee</label>
           <input
             placeholder="Search Name"
@@ -98,7 +92,7 @@ const fetchHistory = async () => {
           />
         </div>
 
-        <div className="filter-group">
+        <div>
           <label>Meal Type</label>
           <select
             value={selectedMealType}
@@ -121,6 +115,7 @@ const fetchHistory = async () => {
               <th>Name</th>
               <th>Date</th>
               <th>Meal</th>
+              <th>Food</th>
               <th>Price</th>
             </tr>
           </thead>
@@ -129,19 +124,24 @@ const fetchHistory = async () => {
             {records.length > 0 ? (
               records.map((r, i) => (
                 <tr key={i}>
-                  <td>{r.fullName || r.employeeName}</td>
+                  <td>{r.fullName}</td>
+
                   <td>
                     {r.mealDate
                       ? new Date(r.mealDate).toLocaleDateString()
-                      : r.date?.split("T")[0]}
+                      : ""}
                   </td>
-                  <td>{r.mealName || r.mealType?.mealName}</td>
+
+                  <td>{r.mealName}</td>
+
+                  <td>{r.foodName}</td>
+
                   <td>₹{r.fixedPrice}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4">No Records Found</td>
+                <td colSpan="5">No Records Found</td>
               </tr>
             )}
           </tbody>
