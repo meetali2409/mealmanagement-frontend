@@ -28,10 +28,14 @@ function Dashboard() {
       .then((data) => setFoods(data || []));
   }, [selectedMeal]);
 
-  useEffect(() => {
+  const loadPlates = () => {
     fetch(`${API}/api/Meal/TodayTotalPlates`)
       .then((res) => res.json())
       .then((data) => setTodayPlates(data || 0));
+  };
+
+  useEffect(() => {
+    loadPlates();
   }, []);
 
   const toggleFood = (id) => {
@@ -42,9 +46,10 @@ function Dashboard() {
     }
   };
 
+  
   const handleAddMeal = async () => {
     if (!selectedMeal || selectedFoods.length === 0) {
-      toast.warning("Select meal and at least one food");
+      toast.warning("Select meal and food");
       return;
     }
 
@@ -52,9 +57,7 @@ function Dashboard() {
       for (let foodId of selectedFoods) {
         await fetch(`${API}/api/Meal/Add`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             employeeId: user.employeeId,
             mealTypeId: parseInt(selectedMeal),
@@ -63,8 +66,10 @@ function Dashboard() {
         });
       }
 
-      toast.success("Meals Added 🍽");
+      toast.success("Meal Added 🍽");
+
       setSelectedFoods([]);
+      loadPlates(); 
     } catch (err) {
       console.error(err);
       toast.error("Error adding meal");
@@ -72,52 +77,63 @@ function Dashboard() {
   };
 
   return (
-    <div className="container">
-      <h2>🍽 Welcome, {user?.fullName}</h2>
+    <div className="dashboard">
 
-      <div className="summary-card">
-        <h4>Today's Plates</h4>
-        <p>{todayPlates}</p>
+      <div className="dashboard-header">
+        <h2>👋 Welcome, {user?.fullName}</h2>
       </div>
 
-      <select
-        value={selectedMeal}
-        onChange={(e) => {
-          setSelectedMeal(e.target.value);
-          setSelectedFoods([]); 
-        }}
-      >
-        <option value="">Select Meal Type</option>
-        {mealTypes.map((m) => (
-          <option key={m.mealTypeId} value={m.mealTypeId}>
-            {m.mealName}
-          </option>
-        ))}
-      </select>
 
-      {selectedMeal && (
-        <div className="meal-grid">
-          {foods.length > 0 ? (
-            foods.map((f) => (
-              <div
-                key={f.foodId}
-                className={`meal-card ${
-                  selectedFoods.includes(f.foodId) ? "active" : ""
-                }`}
-                onClick={() => toggleFood(f.foodId)}
-              >
-                {f.foodName}
-              </div>
-            ))
-          ) : (
-            <p>No food available</p>
-          )}
+      <div className="summary-box">
+        <div className="summary-card">
+          <h4>Today's Plates</h4>
+          <p>{todayPlates}</p>
         </div>
-      )}
+      </div>
 
-      <button className="primary" onClick={handleAddMeal}>
-        Add Meal
-      </button>
+ 
+      <div className="card">
+        <h3>🍽 Select Meal</h3>
+
+        <select
+          value={selectedMeal}
+          onChange={(e) => {
+            setSelectedMeal(e.target.value);
+            setSelectedFoods([]);
+          }}
+        >
+          <option value="">Select Meal Type</option>
+          {mealTypes.map((m) => (
+            <option key={m.mealTypeId} value={m.mealTypeId}>
+              {m.mealName}
+            </option>
+          ))}
+        </select>
+
+        {selectedMeal && (
+          <div className="meal-grid">
+            {foods.length > 0 ? (
+              foods.map((f) => (
+                <div
+                  key={f.foodId}
+                  className={`meal-item ${
+                    selectedFoods.includes(f.foodId) ? "active" : ""
+                  }`}
+                  onClick={() => toggleFood(f.foodId)}
+                >
+                  {f.foodName}
+                </div>
+              ))
+            ) : (
+              <p>No food available</p>
+            )}
+          </div>
+        )}
+
+        <button className="primary" onClick={handleAddMeal}>
+          Add Meal
+        </button>
+      </div>
     </div>
   );
 }

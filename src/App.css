@@ -289,10 +289,9 @@ tbody tr:nth-child(even) {
 .password-wrapper span:hover {
   transform: translateY(-50%) scale(1.2);
 }
-
 .meal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
   margin-top: 15px;
 }
@@ -300,24 +299,24 @@ tbody tr:nth-child(even) {
 .meal-item {
   padding: 15px;
   border-radius: 12px;
-  background: #0f1419;
+  background: linear-gradient(145deg, #11161c, #0f1419);
   border: 1px solid #2d333b;
   cursor: pointer;
   text-align: center;
   transition: 0.3s;
+  font-weight: 500;
 }
 
 .meal-item:hover {
   transform: scale(1.05);
+  border-color: #1fba7a;
 }
 
 .meal-item.active {
   border: 2px solid #1fba7a;
-  box-shadow: 0 0 15px rgba(31,186,122,0.6);
-}
-.meal-item.active {
-  border: 2px solid #1fba7a;
-  background: rgba(31,186,122,0.1);
+  background: rgba(31,186,122,0.2);
+  box-shadow: 0 0 10px rgba(31,186,122,0.5);
+  color: #1fba7a;
 }
 @media (max-width: 768px) {
   .dashboard-header {
