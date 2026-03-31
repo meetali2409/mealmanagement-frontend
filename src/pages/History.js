@@ -83,14 +83,18 @@ function History() {
   }, [fromDate, toDate, name, selectedMealType]);
 
   const handleEdit = (record) => {
+    console.log("Edit:", record);
+
     setSelectedMealType(record.mealTypeId);
     setName(record.fullName);
   };
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this record?")) return;
+  const handleDeleteGroup = async (record) => {
+    if (!window.confirm("Delete this meal?")) return;
 
     try {
-      const res = await fetch(`${API}/api/Meal/Delete/${id}`, {
+      const url = `${API}/api/Meal/DeleteByGroup?employeeId=${record.employeeId}&mealTypeId=${record.mealTypeId}&date=${record.mealDate}`;
+
+      const res = await fetch(url, {
         method: "DELETE",
       });
 
@@ -103,6 +107,30 @@ function History() {
       fetchHistory();
     } catch (err) {
       console.error(err);
+    }
+  };
+  const handleDelete = async (id) => {
+    console.log("Deleting ID:", id);
+
+    if (!window.confirm("Delete this record?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/Meal/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      const text = await res.text();
+      console.log("Response:", text);
+
+      if (!res.ok) {
+        alert("Delete failed");
+        return;
+      }
+
+      alert("Deleted successfully");
+      fetchHistory();
+    } catch (err) {
+      console.error("Delete error:", err);
     }
   };
   return (
@@ -184,8 +212,9 @@ function History() {
 
                   <td>₹{r.fixedPrice}</td>
                   <td>
-                    <button onClick={() => handleDelete(r.id)}>Delete</button>
-                    <button onClick={() => handleEdit(r.id)}>Edit</button>
+                    <button onClick={() => handleDeleteGroup(r)}>Delete</button> 
+                    <button onClick={() => handleEdit(r)}>Edit</button>
+                  
                   </td>
                 </tr>
               ))
