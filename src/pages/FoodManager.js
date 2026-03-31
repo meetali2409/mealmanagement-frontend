@@ -161,7 +161,7 @@ function FoodManager() {
                 foods.map((f) => (
                   <tr key={f.foodId}>
                     <td>{f.foodName}</td>
-                    <td>{f.mealType?.mealName || "-"}</td>
+                    <td>{f.mealName || "-"}</td>
                     <td>
                       <button onClick={() => editFood(f)}>Edit</button>
                       <button onClick={() => deleteFood(f.foodId)}>
