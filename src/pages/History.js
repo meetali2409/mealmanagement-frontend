@@ -40,15 +40,22 @@ function History() {
 
       const grouped = Object.values(
         (data.records || []).reduce((acc, item) => {
-          const key = `${item.fullName}_${item.mealDate}_${item.mealName}`;
+          const dateOnly = new Date(item.mealDate)
+            .toISOString()
+            .split("T")[0];
+
+          const key = `${item.fullName}_${dateOnly}_${item.mealName}`;
 
           if (!acc[key]) {
             acc[key] = {
               ...item,
+              mealDate: dateOnly,
               foodNames: [item.foodName],
             };
           } else {
             acc[key].foodNames.push(item.foodName);
+
+            acc[key].foodNames = [...new Set(acc[key].foodNames)];
           }
 
           return acc;
@@ -78,6 +85,7 @@ function History() {
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
+
       <div className="history-filters">
         <div>
           <label>From Date</label>
