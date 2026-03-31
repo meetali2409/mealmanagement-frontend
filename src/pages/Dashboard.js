@@ -13,7 +13,12 @@ function Dashboard() {
   const [selectedFoods, setSelectedFoods] = useState([]);
 
   const [todayPlates, setTodayPlates] = useState(0);
-
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("employee");
+      window.location.href = "/login";
+    }
+  };
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
@@ -46,7 +51,7 @@ function Dashboard() {
     }
   };
 
-  
+
   const handleAddMeal = async () => {
     if (!selectedMeal || selectedFoods.length === 0) {
       toast.warning("Select meal and food");
@@ -69,7 +74,7 @@ function Dashboard() {
       toast.success("Meal Added 🍽");
 
       setSelectedFoods([]);
-      loadPlates(); 
+      loadPlates();
     } catch (err) {
       console.error(err);
       toast.error("Error adding meal");
@@ -80,7 +85,11 @@ function Dashboard() {
     <div className="dashboard">
 
       <div className="dashboard-header">
-        <h2>👋 Welcome, {user?.fullName}</h2>
+        <h2> Welcome, {user?.fullName}</h2>
+
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
 
 
@@ -91,7 +100,7 @@ function Dashboard() {
         </div>
       </div>
 
- 
+
       <div className="card">
         <h3>🍽 Select Meal</h3>
 
@@ -116,9 +125,8 @@ function Dashboard() {
               foods.map((f) => (
                 <div
                   key={f.foodId}
-                  className={`meal-item ${
-                    selectedFoods.includes(f.foodId) ? "active" : ""
-                  }`}
+                  className={`meal-item ${selectedFoods.includes(f.foodId) ? "active" : ""
+                    }`}
                   onClick={() => toggleFood(f.foodId)}
                 >
                   {f.foodName}

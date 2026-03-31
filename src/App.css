@@ -46,14 +46,18 @@ body {
 .dashboard-header button:hover {
   transform: scale(1.05);
 }
-
-
 .logout-btn {
   background: linear-gradient(135deg, #e54848, #c0392b);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
 }
 
-
-
+.logout-btn:hover {
+  transform: scale(1.05);
+}
 .card {
   background: linear-gradient(145deg, #11161c, #0f1419);
   padding: 20px;
