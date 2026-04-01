@@ -27,7 +27,6 @@ function Dashboard() {
       .then((data) => setMealTypes(data || []));
   }, []);
 
-
   useEffect(() => {
     if (!selectedMeal) return;
 
@@ -36,7 +35,6 @@ function Dashboard() {
       .then((data) => setFoods(data || []));
   }, [selectedMeal]);
 
- 
   const loadPlates = () => {
     fetch(`${API}/api/Meal/TodayTotalPlates`)
       .then((res) => res.json())
@@ -88,15 +86,13 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-
       <div className="dashboard-header">
         <h2> Welcome, {user?.fullName}</h2>
 
         <div style={{ display: "flex", gap: "10px" }}>
-  
           <button
             className="secondary"
-            onClick={() => (window.location.href = "/my-history")}
+            onClick={() => (window.location.href = "/myhistory")}
           >
             My History
           </button>
@@ -113,7 +109,6 @@ function Dashboard() {
           <p>{todayPlates}</p>
         </div>
       </div>
-
 
       <div className="card">
         <h3>🍽 Select Meal</h3>

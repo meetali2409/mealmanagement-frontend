@@ -8,6 +8,7 @@ import History from "./pages/History";
 import AdminDashBoard from "./pages/AdminDashBoard";
 import FoodManager from "./pages/FoodManager";
 import MealTypeManager from "./pages/MealTypeManager"
+import MyHistory from "./pages/MyHistory"
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +21,7 @@ function App() {
         <Route path="/admindashboard" element={<AdminDashBoard/>}/>
         <Route path="/food" element={<FoodManager/>}/>
         <Route path="/mealtype" element={<MealTypeManager />} />
+        <Route path="/myhistory" element={<MyHistory />}/>
       </Routes>
       <ToastContainer
         position="top-right"
