@@ -132,38 +132,40 @@ function History() {
     }
   };
 
-  const handleUpdate = async () => {
-    const formattedDate = new Date(editRecord.mealDate)
-      .toISOString()
-      .split("T")[0];
+const handleUpdate = async () => {
+  const formattedDate = new Date(editRecord.mealDate)
+    .toISOString()
+    .split("T")[0];
 
-   
-    await fetch(
-      `${API}/api/Meal/DeleteByGroup?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&date=${formattedDate}`,
-      { method: "DELETE" }
-    );
+  // DELETE OLD
+  await fetch(
+    `${API}/api/Meal/DeleteByGroup?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&date=${formattedDate}`,
+    { method: "DELETE" }
+  );
 
-    for (let foodName of selectedFoods) {
-      const food = foodOptions.find((f) => f.foodName === foodName);
+  // ADD NEW
+  for (let foodName of selectedFoods) {
+    const food = foodOptions.find((f) => f.foodName === foodName);
 
-      await fetch(`${API}/api/Meal/Add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: editRecord.employeeId,
-          mealTypeId: editRecord.mealTypeId,
-          foodId: food.foodId,
-        }),
-      });
-    }
+    if (!food) continue;
 
-    alert("Updated successfully");
-    setEditModal(false);
-    fetchHistory();
-  };
+    await fetch(`${API}/api/Meal/Add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employeeId: editRecord.employeeId,
+        mealTypeId: editRecord.mealTypeId,
+        foodId: food.foodId,
+      }),
+    });
+  }
 
+  alert("Updated successfully");
+  setEditModal(false);
+  fetchHistory();
+};
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
