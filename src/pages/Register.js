@@ -26,43 +26,43 @@ function Register() {
     }
   }, [navigate]);
 
-  const handleRegister = async () => {
-    if (!fullName.trim() || !password.trim() || !email.trim()) {
-      toast.warning("Name, Email and Password required!");
-      return;
+ const handleRegister = async () => {
+  if (!fullName.trim() || !password.trim() || !email.trim()) {
+    toast.warning("Name, Email and Password required!");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await fetch(`${API}/api/Employee/Register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fullName: fullName.trim(),
+        password: password.trim(),
+        email: email.trim(),
+        role: role,
+      }),
+    });
+
+    const data = await response.json(); 
+
+    if (response.ok) {
+      toast.success(data.message || "Registered Successfully 🎉"); 
+      navigate("/login");
+    } else {
+      toast.error(data.message || "Registration failed");
     }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${API}/api/Employee/Register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          password: password.trim(),
-          email: email.trim(),
-          role: role,
-        }),
-      });
-
-      const text = await response.text();
-
-      if (response.ok) {
-        toast.success(text || "Registered Successfully 🎉");
-        navigate("/login");
-      } else {
-        toast.error(text || "Registration failed");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Server error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("Server error. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-container">
@@ -75,7 +75,6 @@ function Register() {
       >
         <h2 className="login-title">Create Account</h2>
 
-        {/* EMAIL */}
         <input
           type="email"
           className="login-input"
@@ -84,7 +83,6 @@ function Register() {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* NAME */}
         <input
           type="text"
           className="login-input"
@@ -92,8 +90,6 @@ function Register() {
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
-
-        {/* PASSWORD */}
         <div className="password-wrapper">
           <input
             type={showPassword ? "text" : "password"}
@@ -108,7 +104,6 @@ function Register() {
           </span>
         </div>
 
-        {/* ROLE */}
         <select
           className="login-input"
           value={role}
@@ -118,12 +113,10 @@ function Register() {
           <option value="Admin">Admin</option>
         </select>
 
-        {/* BUTTON */}
         <button type="submit" className="login-btn" disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </button>
 
-        {/* LOGIN LINK */}
         <p className="register-text">
           Already have an account? <Link to="/login">Login</Link>
         </p>
