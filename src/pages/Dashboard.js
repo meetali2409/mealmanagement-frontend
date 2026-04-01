@@ -53,36 +53,43 @@ function Dashboard() {
     }
   };
 
-  const handleAddMeal = async () => {
-    if (!selectedMeal || selectedFoods.length === 0) {
-      toast.warning("Select meal and food");
-      return;
+const handleAddMeal = async () => {
+  if (!selectedMeal || selectedFoods.length === 0) {
+    toast.warning("Select meal and food");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/api/Meal/AddBulk`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employeeId: user.employeeId,
+        mealTypeId: parseInt(selectedMeal),
+        foodIds: selectedFoods,
+      }),
+    });
+
+    const data = await res.json(); 
+
+    if (!res.ok) {
+      throw new Error(data.message || "Something went wrong");
     }
 
-    try {
-      const res = await fetch(`${API}/api/Meal/AddBulk`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId: user.employeeId,
-          mealTypeId: parseInt(selectedMeal),
-          foodIds: selectedFoods,
-        }),
-      });
+    toast.success(data.message || "Meal Added 🍽");
 
-      if (!res.ok) throw new Error();
+    setSelectedFoods([]);
+    setSelectedMeal("");
 
-      toast.success("Meal Added 🍽");
+    loadPlates();
 
-      setSelectedFoods([]);
-      loadPlates();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error adding meal");
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Error adding meal");
+  }
+};
 
   return (
     <div className="dashboard">
