@@ -14,11 +14,19 @@ function Dashboard() {
 
   const [todayPlates, setTodayPlates] = useState(0);
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem("employee");
+      window.location.href = "/login";
+    }
+  };
+
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
       .then((data) => setMealTypes(data || []));
   }, []);
+
 
   useEffect(() => {
     if (!selectedMeal) return;
@@ -28,6 +36,7 @@ function Dashboard() {
       .then((data) => setFoods(data || []));
   }, [selectedMeal]);
 
+ 
   const loadPlates = () => {
     fetch(`${API}/api/Meal/TodayTotalPlates`)
       .then((res) => res.json())
@@ -53,17 +62,19 @@ function Dashboard() {
     }
 
     try {
-      for (let foodId of selectedFoods) {
-        await fetch(`${API}/api/Meal/Add`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            employeeId: user.employeeId,
-            mealTypeId: parseInt(selectedMeal),
-            foodId: foodId,
-          }),
-        });
-      }
+      const res = await fetch(`${API}/api/Meal/AddBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: user.employeeId,
+          mealTypeId: parseInt(selectedMeal),
+          foodIds: selectedFoods,
+        }),
+      });
+
+      if (!res.ok) throw new Error();
 
       toast.success("Meal Added 🍽");
 
@@ -77,8 +88,23 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
+
       <div className="dashboard-header">
-        <h2>👋 Welcome, {user?.fullName}</h2>
+        <h2> Welcome, {user?.fullName}</h2>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+  
+          <button
+            className="secondary"
+            onClick={() => (window.location.href = "/my-history")}
+          >
+            My History
+          </button>
+
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="summary-box">
@@ -87,6 +113,7 @@ function Dashboard() {
           <p>{todayPlates}</p>
         </div>
       </div>
+
 
       <div className="card">
         <h3>🍽 Select Meal</h3>
@@ -125,8 +152,7 @@ function Dashboard() {
             )}
           </div>
         )}
-        <button className="primary" onClick={() => (window.location.href = "/my-history")}>My History
-        </button>
+
         <button className="primary" onClick={handleAddMeal}>
           Add Meal
         </button>
