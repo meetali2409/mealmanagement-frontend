@@ -51,35 +51,32 @@ function Dashboard() {
     }
   };
 
-
   const handleAddMeal = async () => {
-    if (!selectedMeal || selectedFoods.length === 0) {
-      toast.warning("Select meal and food");
-      return;
-    }
+  if (!selectedMeal || selectedFoods.length === 0) {
+    toast.warning("Select meal and food");
+    return;
+  }
 
-    try {
-      for (let foodId of selectedFoods) {
-        await fetch(`${API}/api/Meal/Add`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            employeeId: user.employeeId,
-            mealTypeId: parseInt(selectedMeal),
-            foodId: foodId,
-          }),
-        });
-      }
+  try {
+    await fetch(`${API}/api/Meal/Add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        employeeId: user.employeeId,
+        mealTypeId: parseInt(selectedMeal),
+        foodId: selectedFoods[0], 
+      }),
+    });
 
-      toast.success("Meal Added 🍽");
+    toast.success("Meal Added 🍽");
 
-      setSelectedFoods([]);
-      loadPlates();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error adding meal");
-    }
-  };
+    setSelectedFoods([]);
+    loadPlates();
+  } catch (err) {
+    console.error(err);
+    toast.error("Error adding meal");
+  }
+};
 
   return (
     <div className="dashboard">
@@ -91,19 +88,14 @@ function Dashboard() {
           Logout
         </button>
       </div>
-
-
       <div className="summary-box">
         <div className="summary-card">
           <h4>Today's Plates</h4>
           <p>{todayPlates}</p>
         </div>
       </div>
-
-
       <div className="card">
         <h3>🍽 Select Meal</h3>
-
         <select
           value={selectedMeal}
           onChange={(e) => {
