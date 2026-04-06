@@ -60,7 +60,7 @@ const handleAddMeal = async () => {
   }
 
   try {
-    const res = await fetch(`${API}/api/Meal/Add`, {
+    const res = await fetch(`${API}/api/Meal/AddBulk`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -70,19 +70,20 @@ const handleAddMeal = async () => {
       }),
     });
 
-    const msg = await res.text();
+    const data = await res.json();
 
     if (!res.ok) {
-      toast.error(msg);
+      toast.error(data.message || "Meal already added ❌");
       return;
     }
 
-    toast.success("Meal Added 🍽");
+    toast.success(data.message || "Meal Added 🍽");
 
     setSelectedFoods([]);
-    loadPlates();
-  } catch {
-    toast.error("Error");
+    loadPlates(); 
+  } catch (err) {
+    console.error(err);
+    toast.error("Server error");
   }
 };
 
