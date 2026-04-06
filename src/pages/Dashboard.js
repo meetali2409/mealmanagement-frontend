@@ -60,11 +60,9 @@ const handleAddMeal = async () => {
   }
 
   try {
-    const res = await fetch(`${API}/api/Meal/AddBulk`, {
+    const res = await fetch(`${API}/api/Meal/Add`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         employeeId: user.employeeId,
         mealTypeId: parseInt(selectedMeal),
@@ -72,22 +70,19 @@ const handleAddMeal = async () => {
       }),
     });
 
-    const data = await res.json(); 
+    const msg = await res.text();
 
     if (!res.ok) {
-      throw new Error(data.message || "Something went wrong");
+      toast.error(msg);
+      return;
     }
 
-    toast.success(data.message || "Meal Added 🍽");
+    toast.success("Meal Added 🍽");
 
     setSelectedFoods([]);
-    setSelectedMeal("");
-
     loadPlates();
-
-  } catch (err) {
-    console.error(err);
-    toast.error(err.message || "Error adding meal");
+  } catch {
+    toast.error("Error");
   }
 };
 

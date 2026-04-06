@@ -22,56 +22,26 @@ function History() {
     try {
       let params = new URLSearchParams();
 
-      if (fromDate) {
+      if (fromDate)
         params.append("fromDate", fromDate.toISOString().split("T")[0]);
-      }
 
-      if (toDate) {
+      if (toDate)
         params.append("toDate", toDate.toISOString().split("T")[0]);
-      }
 
-      if (name.trim()) {
-        params.append("name", name.trim());
-      }
+      if (name.trim()) params.append("name", name.trim());
 
-      if (selectedMealType) {
+      if (selectedMealType)
         params.append("mealTypeId", selectedMealType);
-      }
 
-      const url = `${API}/api/Meal/History?${params.toString()}`;
-
-      const res = await fetch(url);
+      const res = await fetch(
+        `${API}/api/Meal/History?${params.toString()}`
+      );
       const data = await res.json();
 
-      const grouped = Object.values(
-        (data.records || []).reduce((acc, item) => {
-          const dateOnly = new Date(item.mealDate)
-            .toISOString()
-            .split("T")[0];
-
-          const key = `${item.fullName}_${dateOnly}_${item.mealName}`;
-
-          if (!acc[key]) {
-            acc[key] = {
-              ...item,
-              mealDate: dateOnly,
-              employeeId: item.employeeId,
-              mealTypeId: item.mealTypeId,
-              foodNames: [item.foodName],
-            };
-          } else {
-            acc[key].foodNames.push(item.foodName);
-            acc[key].foodNames = [...new Set(acc[key].foodNames)];
-          }
-
-          return acc;
-        }, {})
-      );
-
-      setRecords(grouped);
+      setRecords(data.records || []);
       setTotal(data.totalAmount || 0);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -79,7 +49,7 @@ function History() {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
       .then((data) => setMealTypes(data))
-      .catch((err) => console.error(err));
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -89,22 +59,13 @@ function History() {
   const handleDelete = async (record) => {
     if (!window.confirm("Delete this meal?")) return;
 
-    const formattedDate = new Date(record.mealDate)
-      .toISOString()
-      .split("T")[0];
-
     try {
-      const res = await fetch(
-        `${API}/api/Meal/DeleteByGroup?employeeId=${record.employeeId}&mealTypeId=${record.mealTypeId}&date=${formattedDate}`,
+      await fetch(
+        `${API}/api/Meal/Delete/${record.employeeId}/${record.mealTypeId}`,
         { method: "DELETE" }
       );
 
-      if (!res.ok) {
-        alert("Delete failed");
-        return;
-      }
-
-      alert("Deleted successfully");
+      alert("Deleted");
       fetchHistory();
     } catch (err) {
       console.error(err);
@@ -132,28 +93,38 @@ function History() {
     }
   };
 
-const handleUpdate = async () => {
-  const formattedDate = editRecord.mealDate;
+  const handleUpdate = async () => {
+    try {
+      
+      await fetch(
+        `${API}/api/Meal/Delete/${editRecord.employeeId}/${editRecord.mealTypeId}`,
+        { method: "DELETE" }
+      );
 
-  await fetch(
-    `${API}/api/Meal/DeleteByGroup?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&date=${formattedDate}`,
-    { method: "DELETE" }
-  );
-  const food = foodOptions.find(f => f.foodName === selectedFoods[0]);
+      // get foodIds from names
+      const foodIds = foodOptions
+        .filter((f) => selectedFoods.includes(f.foodName))
+        .map((f) => f.foodId);
 
-  await fetch(`${API}/api/Meal/Add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      employeeId: editRecord.employeeId,
-      mealTypeId: editRecord.mealTypeId,
-      foodId: food.foodId,
-    }),
-  });
+      // add new
+      await fetch(`${API}/api/Meal/AddBulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeId: editRecord.employeeId,
+          mealTypeId: editRecord.mealTypeId,
+          foodIds: foodIds,
+        }),
+      });
 
-  alert("Updated");
-  fetchHistory();
-};
+      alert("Updated");
+      setEditModal(false);
+      fetchHistory();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="container">
       <h2>📊 Meal History</h2>
@@ -208,7 +179,7 @@ const handleUpdate = async () => {
               <td>{r.fullName}</td>
               <td>{new Date(r.mealDate).toLocaleDateString()}</td>
               <td>{r.mealName}</td>
-              <td>{r.foodNames.join(", ")}</td>
+              <td>{r.foodNames?.join(", ")}</td>
               <td>₹{r.fixedPrice}</td>
               <td>
                 <button onClick={() => handleDelete(r)}>Delete</button>

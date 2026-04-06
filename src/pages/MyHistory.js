@@ -16,29 +16,7 @@ function MyHistory() {
 
       const data = await res.json();
 
-      const grouped = Object.values(
-        (data.records || []).reduce((acc, item) => {
-          const dateOnly = new Date(item.mealDate)
-            .toISOString()
-            .split("T")[0];
-
-          const key = `${item.mealTypeId}_${dateOnly}`;
-
-          if (!acc[key]) {
-            acc[key] = {
-              ...item,
-              mealDate: dateOnly,
-              foodNames: [item.foodName],
-            };
-          } else {
-            acc[key].foodNames.push(item.foodName);
-          }
-
-          return acc;
-        }, {})
-      );
-
-      setRecords(grouped);
+      setRecords(data.records || []);
       setTotal(data.totalAmount || 0);
     } catch (err) {
       console.error("Error:", err);
@@ -69,7 +47,13 @@ function MyHistory() {
               <tr key={i}>
                 <td>{new Date(r.mealDate).toLocaleDateString()}</td>
                 <td>{r.mealName}</td>
-                <td>{r.foodNames.join(", ")}</td>
+
+                <td>
+                  {r.foodNames && r.foodNames.length > 0
+                    ? r.foodNames.join(", ")
+                    : "No Food"}
+                </td>
+
                 <td>₹{r.fixedPrice}</td>
               </tr>
             ))
@@ -87,7 +71,7 @@ function MyHistory() {
         style={{ marginTop: "20px" }}
         onClick={() => (window.location.href = "/dashboard")}
       >
-         Back to Dashboard
+        Back to Dashboard
       </button>
     </div>
   );
