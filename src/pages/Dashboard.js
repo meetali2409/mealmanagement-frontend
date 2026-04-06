@@ -8,23 +8,19 @@ function Dashboard() {
 
   const [mealTypes, setMealTypes] = useState([]);
   const [foods, setFoods] = useState([]);
-
   const [selectedMeal, setSelectedMeal] = useState("");
   const [selectedFoods, setSelectedFoods] = useState([]);
-
   const [todayPlates, setTodayPlates] = useState(0);
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("employee");
-      window.location.href = "/login";
-    }
+    localStorage.removeItem("employee");
+    window.location.href = "/login";
   };
 
   useEffect(() => {
     fetch(`${API}/api/MealType/All`)
       .then((res) => res.json())
-      .then((data) => setMealTypes(data || []));
+      .then((data) => setMealTypes(data));
   }, []);
 
   useEffect(() => {
@@ -32,13 +28,13 @@ function Dashboard() {
 
     fetch(`${API}/api/Food/ByMeal/${selectedMeal}`)
       .then((res) => res.json())
-      .then((data) => setFoods(data || []));
+      .then((data) => setFoods(data));
   }, [selectedMeal]);
 
   const loadPlates = () => {
     fetch(`${API}/api/Meal/TodayTotalPlates`)
       .then((res) => res.json())
-      .then((data) => setTodayPlates(data || 0));
+      .then((data) => setTodayPlates(data));
   };
 
   useEffect(() => {
@@ -53,108 +49,81 @@ function Dashboard() {
     }
   };
 
-const handleAddMeal = async () => {
-  if (!selectedMeal || selectedFoods.length === 0) {
-    toast.warning("Select meal and food");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/api/Meal/AddBulk`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        employeeId: user.employeeId,
-        mealTypeId: parseInt(selectedMeal),
-        foodIds: selectedFoods,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error(data.message || "Meal already added ❌");
+  const handleAddMeal = async () => {
+    if (!selectedMeal || selectedFoods.length === 0) {
+      toast.warning("Select meal and food");
       return;
     }
 
-    toast.success(data.message || "Meal Added 🍽");
+    try {
+      const res = await fetch(`${API}/api/Meal/AddBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: user.employeeId,
+          mealTypeId: parseInt(selectedMeal),
+          foodIds: selectedFoods,
+        }),
+      });
 
-    setSelectedFoods([]);
-    loadPlates(); 
-  } catch (err) {
-    console.error(err);
-    toast.error("Server error");
-  }
-};
+      const data = await res.json(); // ✅ FIX
+
+      if (!res.ok) {
+        toast.error(data.message);
+        return;
+      }
+
+      toast.success(data.message);
+
+      setSelectedFoods([]);
+      loadPlates(); // ✅ refresh plate
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    }
+  };
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h2> Welcome, {user?.fullName}</h2>
+      <h2>Welcome, {user?.fullName}</h2>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+      <h3>Today's Plates: {todayPlates}</h3>
+
+      <select
+        value={selectedMeal}
+        onChange={(e) => {
+          setSelectedMeal(e.target.value);
+          setSelectedFoods([]);
+        }}
+      >
+        <option value="">Select Meal</option>
+        {mealTypes.map((m) => (
+          <option key={m.mealTypeId} value={m.mealTypeId}>
+            {m.mealName}
+          </option>
+        ))}
+      </select>
+
+      <div>
+        {foods.map((f) => (
           <button
-            className="secondary"
-            onClick={() => (window.location.href = "/myhistory")}
+            key={f.foodId}
+            onClick={() => toggleFood(f.foodId)}
+            style={{
+              background: selectedFoods.includes(f.foodId)
+                ? "green"
+                : "gray",
+              margin: "5px",
+            }}
           >
-            My History
+            {f.foodName}
           </button>
-
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
+        ))}
       </div>
 
-      <div className="summary-box">
-        <div className="summary-card">
-          <h4>Today's Plates</h4>
-          <p>{todayPlates}</p>
-        </div>
-      </div>
-
-      <div className="card">
-        <h3>🍽 Select Meal</h3>
-
-        <select
-          value={selectedMeal}
-          onChange={(e) => {
-            setSelectedMeal(e.target.value);
-            setSelectedFoods([]);
-          }}
-        >
-          <option value="">Select Meal Type</option>
-          {mealTypes.map((m) => (
-            <option key={m.mealTypeId} value={m.mealTypeId}>
-              {m.mealName}
-            </option>
-          ))}
-        </select>
-
-        {selectedMeal && (
-          <div className="meal-grid">
-            {foods.length > 0 ? (
-              foods.map((f) => (
-                <div
-                  key={f.foodId}
-                  className={`meal-item ${
-                    selectedFoods.includes(f.foodId) ? "active" : ""
-                  }`}
-                  onClick={() => toggleFood(f.foodId)}
-                >
-                  {f.foodName}
-                </div>
-              ))
-            ) : (
-              <p>No food available</p>
-            )}
-          </div>
-        )}
-
-        <button className="primary" onClick={handleAddMeal}>
-          Add Meal
-        </button>
-      </div>
+      <button onClick={handleAddMeal}>Add Meal</button>
     </div>
   );
 }
