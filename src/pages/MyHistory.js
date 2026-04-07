@@ -11,9 +11,8 @@ function MyHistory() {
   const fetchMyHistory = async () => {
     try {
       const res = await fetch(
-        `${API}/api/Meal/History?name=${user.fullName}`
+        `${API}/api/Meal/History/${user.employeeId}`
       );
-
       const data = await res.json();
 
       setRecords(data.records || []);
