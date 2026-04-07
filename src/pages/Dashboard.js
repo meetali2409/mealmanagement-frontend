@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-
+import { useNavigate } from "react-router-dom";
 const API = "https://mealmanagement-backend-production.up.railway.app";
 
 function Dashboard() {
@@ -13,7 +13,11 @@ function Dashboard() {
   const [selectedFoods, setSelectedFoods] = useState([]);
 
   const [todayPlates, setTodayPlates] = useState(0);
+  const navigate = useNavigate();
 
+  const handleMyHistory = () => {
+    navigate("/myhistory");
+  };
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("employee");
@@ -96,7 +100,9 @@ function Dashboard() {
 
       <div className="dashboard-header">
         <h2>Welcome, {user?.fullName}</h2>
-
+        <button className="logout-btn" onClick={handleMyHistory}>
+          View History
+        </button>
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
