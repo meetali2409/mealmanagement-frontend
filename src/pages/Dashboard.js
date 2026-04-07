@@ -73,7 +73,7 @@ function Dashboard() {
     });
 
     const text = await res.text();
-    console.log("hefad0");
+    console.log("hello");
     console.log("SERVER RESPONSE:", text);
 
     if (!res.ok) {
