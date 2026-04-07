@@ -72,8 +72,8 @@ function Dashboard() {
       }),
     });
 
-    const text = await res.text(); // 🔥 RAW RESPONSE
-
+    const text = await res.text();
+    console.log("hefad0");
     console.log("SERVER RESPONSE:", text);
 
     if (!res.ok) {
