@@ -54,42 +54,42 @@ function Dashboard() {
   };
 
   const handleAddMeal = async () => {
-  if (!selectedMeal || selectedFoods.length === 0) {
-    toast.warning("Select meal and food");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/api/Meal/AddBulk`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        employeeId: user.employeeId,
-        mealTypeId: Number(selectedMeal),
-        foodIds: selectedFoods,
-      }),
-    });
-
-    const text = await res.text();
-    console.log("hello jii");
-    console.log("SERVER RESPONSE:", text);
-
-    if (!res.ok) {
-      toast.error(text);
+    if (!selectedMeal || selectedFoods.length === 0) {
+      toast.warning("Select meal and food");
       return;
     }
 
-    toast.success("Meal Added 🍽");
-    setSelectedFoods([]);
-    loadPlates();
+    try {
+      const res = await fetch(`${API}/api/Meal/AddBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employeeId: user.employeeId,
+          mealTypeId: Number(selectedMeal),
+          foodIds: selectedFoods,
+        }),
+      });
 
-  } catch (err) {
-    console.error(err);
-    toast.error("Server crash");
-  }
-};
+      const text = await res.text();
+      console.log("hello jii");
+      console.log("SERVER RESPONSE:", text);
+
+      if (!res.ok) {
+        toast.error(text);
+        return;
+      }
+
+      toast.success("Meal Added 🍽");
+      setSelectedFoods([]);
+      loadPlates();
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Server crash");
+    }
+  };
 
   return (
     <div className="dashboard">
@@ -133,9 +133,8 @@ function Dashboard() {
               foods.map((f) => (
                 <div
                   key={f.foodId}
-                  className={`meal-item ${
-                    selectedFoods.includes(f.foodId) ? "active" : ""
-                  }`}
+                  className={`meal-item ${selectedFoods.includes(f.foodId) ? "active" : ""
+                    }`}
                   onClick={() => toggleFood(f.foodId)}
                 >
                   {f.foodName}

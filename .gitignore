@@ -1,10 +1,10 @@
-<<<<<<< HEAD
 node_modules/
 build/
 dist/
+
 .env
 .env.local
-=======
+
 # Visual Studio
 .vs/
 bin/
@@ -17,13 +17,6 @@ obj/
 # Logs
 *.log
 
-# Node
-node_modules/
-
-# React build
-build/
-
 # OS
 .DS_Store
 Thumbs.db
->>>>>>> 1a5cf345c4d4cd5c006a8d0226a245332ffbd8e9
