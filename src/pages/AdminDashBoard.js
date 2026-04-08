@@ -34,7 +34,7 @@ function AdminDashboard() {
 
       setTodayPlates(plates || 0);
       setTotalAmount(amount || 0);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -59,7 +59,7 @@ function AdminDashboard() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          employeeId: editEmpId, 
+          employeeId: editEmpId,
           fullName: empName,
         }),
       });
@@ -79,28 +79,29 @@ function AdminDashboard() {
     }
   };
 
-const deleteEmployee = async (id) => {
-  if (!window.confirm("Delete this employee?")) return;
+  const deleteEmployee = async (id) => {
+    if (!window.confirm("Delete this employee?")) return;
 
-  try {
-    const res = await fetch(`${API}/api/Employee/Delete/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`${API}/api/Employee/${id}`, {
+        method: "DELETE",
+      });
 
-    if (!res.ok) {
-      toast.error("Delete failed");
-      return;
+      console.log("STATUS:", res.status); 
+
+      if (!res.ok) {
+        alert("Delete failed");
+        return;
+      }
+
+      alert("Deleted successfully");
+      loadEmployees();
+
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting");
     }
-
-    toast.success("Deleted successfully");
-
-    await loadEmployees();
-
-  } catch {
-    toast.error("Error deleting");
-  }
-};
-
+  };
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
