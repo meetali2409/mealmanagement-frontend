@@ -177,7 +177,6 @@ function History() {
                 <td>₹{r.fixedPrice}</td>
                 <td>
                   <button onClick={() => handleDelete(r)}>Delete</button>
-                  <button onClick={() => handleEdit(r)}>Edit</button>
                 </td>
               </tr>
             ))
@@ -190,27 +189,6 @@ function History() {
       </table>
 
       <h3>Total Amount: ₹{total}</h3>
-
-      {editModal && (
-        <div className="modal">
-          <h3>Edit Meal</h3>
-
-          {foodOptions.map((f) => (
-            <div key={f.foodId}>
-              <input
-                type="checkbox"
-                checked={selectedFoods.includes(f.foodName)}
-                onChange={() => toggleFood(f.foodName)}
-              />
-              {f.foodName}
-            </div>
-          ))}
-
-          <br />
-          <button onClick={handleUpdate}>Save</button>
-          <button onClick={() => setEditModal(false)}>Cancel</button>
-        </div>
-      )}
     </div>
   );
 }
