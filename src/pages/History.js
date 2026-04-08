@@ -20,15 +20,16 @@ function History() {
       if (fromDate !== null) {
         params.append(
           "fromDate",
-          new Date(fromDate).toISOString().split("T")[0]
+          new Date(fromDate).fromDate.toLocaleDateString("en-CA")
         );
       }
 
       if (toDate !== null) {
         params.append(
           "toDate",
-          new Date(toDate).toISOString().split("T")[0]
+          new Date(toDate).toDate.toLocaleDateString("en-CA")
         );
+        
       }
 
       if (name && name.trim() !== "") {
