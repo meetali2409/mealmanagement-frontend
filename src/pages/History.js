@@ -17,26 +17,25 @@ function History() {
     try {
       let params = new URLSearchParams();
 
-      if (fromDate !== null) {
+      if (fromDate) {
         params.append(
           "fromDate",
-          new Date(fromDate).fromDate.toLocaleDateString("en-CA")
+          fromDate.toLocaleDateString("en-CA")
         );
       }
 
-      if (toDate !== null) {
+      if (toDate) {
         params.append(
           "toDate",
-          new Date(toDate).toDate.toLocaleDateString("en-CA")
+          toDate.toLocaleDateString("en-CA")
         );
-        
       }
 
       if (name && name.trim() !== "") {
         params.append("name", name.trim());
       }
 
-      if (selectedMealType && selectedMealType !== "") {
+      if (selectedMealType) {
         params.append("mealTypeId", selectedMealType);
       }
 
