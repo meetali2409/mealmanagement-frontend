@@ -59,17 +59,13 @@ function History() {
   const handleDelete = async (record) => {
     if (!window.confirm("Delete this meal?")) return;
 
-    try {
-      await fetch(
-        `${API}/api/Meal/Delete/${record.employeeId}/${record.mealTypeId}`,
-        { method: "DELETE" }
-      );
+    await fetch(
+      `${API}/api/Meal/Delete?employeeId=${record.employeeId}&mealTypeId=${record.mealTypeId}&mealDate=${record.mealDate}`,
+      { method: "DELETE" }
+    );
 
-      alert("Deleted");
-      fetchHistory();
-    } catch (err) {
-      console.error(err);
-    }
+    alert("Deleted");
+    fetchHistory();
   };
 
   const handleEdit = async (record) => {
@@ -95,18 +91,15 @@ function History() {
 
   const handleUpdate = async () => {
     try {
-      
       await fetch(
-        `${API}/api/Meal/Delete/${editRecord.employeeId}/${editRecord.mealTypeId}`,
+        `${API}/api/Meal/Delete?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&mealDate=${editRecord.mealDate}`,
         { method: "DELETE" }
       );
 
-      // get foodIds from names
       const foodIds = foodOptions
         .filter((f) => selectedFoods.includes(f.foodName))
         .map((f) => f.foodId);
 
-      // add new
       await fetch(`${API}/api/Meal/AddBulk`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -174,19 +167,25 @@ function History() {
         </thead>
 
         <tbody>
-          {records.map((r, i) => (
-            <tr key={i}>
-              <td>{r.fullName}</td>
-              <td>{new Date(r.mealDate).toLocaleDateString()}</td>
-              <td>{r.mealName}</td>
-              <td>{r.foodNames?.join(", ")}</td>
-              <td>₹{r.fixedPrice}</td>
-              <td>
-                <button onClick={() => handleDelete(r)}>Delete</button>
-                <button onClick={() => handleEdit(r)}>Edit</button>
-              </td>
+          {records.length > 0 ? (
+            records.map((r, i) => (
+              <tr key={i}>
+                <td>{r.fullName}</td>
+                <td>{new Date(r.mealDate).toLocaleDateString()}</td>
+                <td>{r.mealName}</td>
+                <td>{r.foodNames?.join(", ")}</td>
+                <td>₹{r.fixedPrice}</td>
+                <td>
+                  <button onClick={() => handleDelete(r)}>Delete</button>
+                  <button onClick={() => handleEdit(r)}>Edit</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6">No Records Found</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 
