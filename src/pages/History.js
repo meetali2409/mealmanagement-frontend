@@ -13,11 +13,6 @@ function History() {
   const [mealTypes, setMealTypes] = useState([]);
   const [selectedMealType, setSelectedMealType] = useState("");
 
-  const [editModal, setEditModal] = useState(false);
-  const [editRecord, setEditRecord] = useState(null);
-  const [foodOptions, setFoodOptions] = useState([]);
-  const [selectedFoods, setSelectedFoods] = useState([]);
-
   const fetchHistory = async () => {
     try {
       let params = new URLSearchParams();
@@ -66,56 +61,6 @@ function History() {
 
     alert("Deleted");
     fetchHistory();
-  };
-
-  const handleEdit = async (record) => {
-    setEditRecord(record);
-    setEditModal(true);
-
-    const res = await fetch(
-      `${API}/api/Food/ByMeal/${record.mealTypeId}`
-    );
-    const data = await res.json();
-
-    setFoodOptions(data);
-    setSelectedFoods(record.foodNames || []);
-  };
-
-  const toggleFood = (foodName) => {
-    if (selectedFoods.includes(foodName)) {
-      setSelectedFoods(selectedFoods.filter((f) => f !== foodName));
-    } else {
-      setSelectedFoods([...selectedFoods, foodName]);
-    }
-  };
-
-  const handleUpdate = async () => {
-    try {
-      await fetch(
-        `${API}/api/Meal/Delete?employeeId=${editRecord.employeeId}&mealTypeId=${editRecord.mealTypeId}&mealDate=${editRecord.mealDate}`,
-        { method: "DELETE" }
-      );
-
-      const foodIds = foodOptions
-        .filter((f) => selectedFoods.includes(f.foodName))
-        .map((f) => f.foodId);
-
-      await fetch(`${API}/api/Meal/AddBulk`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          employeeId: editRecord.employeeId,
-          mealTypeId: editRecord.mealTypeId,
-          foodIds: foodIds,
-        }),
-      });
-
-      alert("Updated");
-      setEditModal(false);
-      fetchHistory();
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return (
