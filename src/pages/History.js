@@ -17,21 +17,36 @@ function History() {
     try {
       let params = new URLSearchParams();
 
-      if (fromDate)
-        params.append("fromDate", fromDate.toISOString().split("T")[0]);
+      if (fromDate !== null) {
+        params.append(
+          "fromDate",
+          new Date(fromDate).toISOString().split("T")[0]
+        );
+      }
 
-      if (toDate)
-        params.append("toDate", toDate.toISOString().split("T")[0]);
+      if (toDate !== null) {
+        params.append(
+          "toDate",
+          new Date(toDate).toISOString().split("T")[0]
+        );
+      }
 
-      if (name.trim()) params.append("name", name.trim());
+      if (name && name.trim() !== "") {
+        params.append("name", name.trim());
+      }
 
-      if (selectedMealType)
+      if (selectedMealType && selectedMealType !== "") {
         params.append("mealTypeId", selectedMealType);
+      }
 
-      const res = await fetch(
-        `${API}/api/Meal/History?${params.toString()}`
-      );
+      const url = `${API}/api/Meal/History?${params.toString()}`;
+
+      console.log("CALLING API:", url);
+
+      const res = await fetch(url);
       const data = await res.json();
+
+      console.log("RESPONSE:", data);
 
       setRecords(data.records || []);
       setTotal(data.totalAmount || 0);
@@ -98,7 +113,10 @@ function History() {
           ))}
         </select>
 
-        <button onClick={fetchHistory} className="apply-btn">
+        <button onClick={() => {
+          console.log("Filter clicked");
+          fetchHistory();
+        }}>
           Apply Filters
         </button>
       </div>
