@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function History() {
-  const API = "https://mealmanagement-backend-production.up.railway.app";
+function History({setLoading}) {
+  const API = "https://localhost";
 
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -15,6 +15,7 @@ function History() {
 
   const fetchHistory = async () => {
     try {
+      setLoading(true);
       let params = new URLSearchParams();
 
       if (fromDate) {
@@ -52,6 +53,9 @@ function History() {
       setTotal(data.totalAmount || 0);
     } catch (err) {
       console.error(err);
+    }
+    finally{
+      setLoading(false);
     }
   };
 

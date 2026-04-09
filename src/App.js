@@ -1,28 +1,39 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import AdminDashBoard from "./pages/AdminDashBoard";
 import FoodManager from "./pages/FoodManager";
-import MealTypeManager from "./pages/MealTypeManager"
-import MyHistory from "./pages/MyHistory"
+import MealTypeManager from "./pages/MealTypeManager";
+import MyHistory from "./pages/MyHistory";
+
+import Loader from "./components/Loader"; 
+
+import { useState } from "react";
+
 function App() {
+  const [loading, setLoading] = useState(false);
+
   return (
     <BrowserRouter>
+      {loading && <Loader />}
+
       <Routes>
-        <Route path="/" element={<Register />} />
-        <Route path="*" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/admindashboard" element={<AdminDashBoard/>}/>
-        <Route path="/food" element={<FoodManager/>}/>
-        <Route path="/mealtype" element={<MealTypeManager />} />
-        <Route path="/myhistory" element={<MyHistory />}/>
+        <Route path="/" element={<Register setLoading={setLoading} />} />
+        <Route path="*" element={<Register setLoading={setLoading} />} />
+        <Route path="/login" element={<Login setLoading={setLoading} />} />
+        <Route path="/dashboard" element={<Dashboard setLoading={setLoading} />} />
+        <Route path="/history" element={<History setLoading={setLoading} />} />
+        <Route path="/admindashboard" element={<AdminDashBoard setLoading={setLoading} />} />
+        <Route path="/food" element={<FoodManager setLoading={setLoading} />} />
+        <Route path="/mealtype" element={<MealTypeManager setLoading={setLoading} />} />
+        <Route path="/myhistory" element={<MyHistory setLoading={setLoading} />} />
       </Routes>
+
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -41,4 +52,5 @@ function App() {
     </BrowserRouter>
   );
 }
+
 export default App;

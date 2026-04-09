@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "https://mealmanagement-backend-production.up.railway.app";
+const API = "https://localhost";
 
 function Register() {
   const [fullName, setFullName] = useState("");

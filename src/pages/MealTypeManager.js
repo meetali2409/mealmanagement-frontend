@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "https://mealmanagement-backend-production.up.railway.app";
+const API = "https://localhost";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -21,31 +21,38 @@ function AdminDashboard() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const loadData = async () => {
     try {
+      setLoading(true);
+
       const emp = await fetch(`${API}/api/Employee/All`).then((r) => r.json());
-      const meal = await fetch(`${API}/api/MealType/All`).then((r) => r.json());
+      const meal = await fetch(`${API}/api/MealType/All`).then((r) =>
+        r.json()
+      );
 
       setEmployees(Array.isArray(emp) ? emp : emp.data || []);
       setMeals(Array.isArray(meal) ? meal : meal.data || []);
     } catch {
       toast.error("Error loading data");
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadStats = async () => {
     try {
       const plates = await fetch(`${API}/api/Meal/TodayTotalPlates`).then((r) =>
-        r.json(),
+        r.json()
       );
       const amount = await fetch(`${API}/api/Meal/TodayTotalAmount`).then((r) =>
-        r.json(),
+        r.json()
       );
 
       setTodayPlates(plates || 0);
       setTotalAmount(amount || 0);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -56,29 +63,55 @@ function AdminDashboard() {
   const saveEmployee = async () => {
     if (!empName) return;
 
-    const url = editEmpId
-      ? `${API}/api/Employee/Update/${editEmpId}`
-      : `${API}/api/Employee/Add`;
+    try {
+      setLoading(true);
 
-    const method = editEmpId ? "PUT" : "POST";
+      const url = editEmpId
+        ? `${API}/api/Employee/Update/${editEmpId}`
+        : `${API}/api/Employee/Add`;
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName: empName }),
-    });
+      const method = editEmpId ? "PUT" : "POST";
 
-    toast.success(editEmpId ? "Employee Updated" : "Employee Added");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName: empName }),
+      });
 
-    setEmpName("");
-    setEditEmpId(null);
-    loadData();
+      if (res.ok) {
+        toast.success(editEmpId ? "Employee Updated" : "Employee Added");
+        setEmpName("");
+        setEditEmpId(null);
+        loadData();
+      } else {
+        toast.error("Operation failed");
+      }
+    } catch {
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteEmployee = async (id) => {
-    await fetch(`${API}/api/Employee/Delete/${id}`, { method: "DELETE" });
-    toast.success("Deleted");
-    loadData();
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${API}/api/Employee/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast.success("Employee Deleted");
+        loadData();
+      } else {
+        toast.error("Delete failed");
+      }
+    } catch {
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const editEmployee = (emp) => {
@@ -89,30 +122,59 @@ function AdminDashboard() {
   const saveMeal = async () => {
     if (!mealName || !price) return;
 
-    const url = editMealId
-      ? `${API}/api/MealType/Update/${editMealId}`
-      : `${API}/api/MealType/Add`;
+    try {
+      setLoading(true);
 
-    const method = editMealId ? "PUT" : "POST";
+      const url = editMealId
+        ? `${API}/api/MealType/Update/${editMealId}`
+        : `${API}/api/MealType/Add`;
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mealName, fixedPrice: price }),
-    });
+      const method = editMealId ? "PUT" : "POST";
 
-    toast.success(editMealId ? "Meal Updated" : "Meal Added");
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mealName, fixedPrice: price }),
+      });
 
-    setMealName("");
-    setPrice("");
-    setEditMealId(null);
-    loadData();
+      if (res.ok) {
+        toast.success(editMealId ? "Meal Updated" : "Meal Added");
+        setMealName("");
+        setPrice("");
+        setEditMealId(null);
+        loadData();
+      } else {
+        toast.error("Operation failed");
+      }
+    } catch {
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteMeal = async (id) => {
-    await fetch(`${API}/api/MealType/Delete/${id}`, { method: "DELETE" });
-    toast.success("Deleted");
-    loadData();
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${API}/api/MealType/Delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.message || "Deleted successfully");
+        loadData();
+      } else {
+        const msg = await res.text();
+        toast.error(msg || "Delete failed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const editMeal = (meal) => {
@@ -127,11 +189,18 @@ function AdminDashboard() {
   };
 
   const filteredEmployees = employees.filter((e) =>
-    e.fullName?.toLowerCase().includes(search.toLowerCase()),
+    e.fullName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="dashboard">
+
+      {loading && (
+        <div className="loader-overlay">
+          <div className="loader"></div>
+        </div>
+      )}
+
       <div className="dashboard-header">
         <h2>Admin Dashboard</h2>
 
@@ -166,7 +235,8 @@ function AdminDashboard() {
           <h4>Revenue</h4>
           <p>₹{totalAmount}</p>
         </div>
-      </div> 
+      </div>
+
       <div className="card">
         <h3>🍽 Meal Types</h3>
 
@@ -182,7 +252,7 @@ function AdminDashboard() {
           onChange={(e) => setPrice(e.target.value)}
         />
 
-        <button className="primary" onClick={saveMeal}>
+        <button disabled={loading} className="primary" onClick={saveMeal}>
           {editMealId ? "Update" : "Add"}
         </button>
 
@@ -202,8 +272,12 @@ function AdminDashboard() {
                   <td>{m.mealName}</td>
                   <td>₹{m.fixedPrice}</td>
                   <td>
-                    <button onClick={() => editMeal(m)}>Edit</button>
-                    <button onClick={() => deleteMeal(m.mealTypeId)}>
+                    <button disabled={loading} onClick={() => editMeal(m)}>
+                      Edit
+                    </button>
+                    <button
+                      disabled={loading}
+                      onClick={() => deleteMeal(m.mealTypeId)}>
                       Delete
                     </button>
                   </td>

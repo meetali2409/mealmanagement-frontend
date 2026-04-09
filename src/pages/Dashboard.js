@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-const API = "https://mealmanagement-backend-production.up.railway.app";
 
-function Dashboard() {
+const API = "https://localhost";
+
+function Dashboard({ setLoading }) {
   const user = JSON.parse(localStorage.getItem("employee"));
 
   const [mealTypes, setMealTypes] = useState([]);
@@ -18,6 +19,7 @@ function Dashboard() {
   const handleMyHistory = () => {
     navigate("/myhistory");
   };
+
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("employee");
@@ -25,24 +27,54 @@ function Dashboard() {
     }
   };
 
+
   useEffect(() => {
-    fetch(`${API}/api/MealType/All`)
-      .then((res) => res.json())
-      .then((data) => setMealTypes(data || []));
+    const loadMealTypes = async () => {
+      try {
+        setLoading(true); 
+
+        const res = await fetch(`${API}/api/MealType/All`);
+        const data = await res.json();
+
+        setMealTypes(data || []);
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    loadMealTypes();
   }, []);
 
   useEffect(() => {
     if (!selectedMeal) return;
 
-    fetch(`${API}/api/Food/ByMeal/${selectedMeal}`)
-      .then((res) => res.json())
-      .then((data) => setFoods(data || []));
+    const loadFoods = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(`${API}/api/Food/ByMeal/${selectedMeal}`);
+        const data = await res.json();
+
+        setFoods(data || []);
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    loadFoods();
   }, [selectedMeal]);
 
-  const loadPlates = () => {
-    fetch(`${API}/api/Meal/TodayTotalPlates`)
-      .then((res) => res.json())
-      .then((data) => setTodayPlates(data || 0));
+  const loadPlates = async () => {
+    try {
+      setLoading(true); 
+
+      const res = await fetch(`${API}/api/Meal/TodayTotalPlates`);
+      const data = await res.json();
+
+      setTodayPlates(data || 0);
+    } finally {
+      setLoading(false); 
+    }
   };
 
   useEffect(() => {
@@ -64,6 +96,8 @@ function Dashboard() {
     }
 
     try {
+      setLoading(true); 
+
       const res = await fetch(`${API}/api/Meal/AddBulk`, {
         method: "POST",
         headers: {
@@ -77,7 +111,6 @@ function Dashboard() {
       });
 
       const text = await res.text();
-      console.log("hello jii");
       console.log("SERVER RESPONSE:", text);
 
       if (!res.ok) {
@@ -92,6 +125,8 @@ function Dashboard() {
     } catch (err) {
       console.error(err);
       toast.error("Server crash");
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -100,12 +135,16 @@ function Dashboard() {
 
       <div className="dashboard-header">
         <h2>Welcome, {user?.fullName}</h2>
-        <button className="logout-btn" onClick={handleMyHistory}>
-          View History
-        </button>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+
+        <div className="header-buttons">
+          <button onClick={handleMyHistory}>
+            View History
+          </button>
+
+          <button onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="summary-box">
@@ -139,8 +178,7 @@ function Dashboard() {
               foods.map((f) => (
                 <div
                   key={f.foodId}
-                  className={`meal-item ${selectedFoods.includes(f.foodId) ? "active" : ""
-                    }`}
+                  className={`meal-item ${selectedFoods.includes(f.foodId) ? "active" : ""}`}
                   onClick={() => toggleFood(f.foodId)}
                 >
                   {f.foodName}

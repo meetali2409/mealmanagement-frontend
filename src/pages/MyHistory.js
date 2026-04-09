@@ -1,26 +1,50 @@
 import { useEffect, useState } from "react";
 
-const API = "https://mealmanagement-backend-production.up.railway.app";
+const API = "https://localhost";
 
-function MyHistory() {
+function MyHistory({ setLoading }) {
   const user = JSON.parse(localStorage.getItem("employee"));
 
   const [records, setRecords] = useState([]);
   const [total, setTotal] = useState(0);
 
   const fetchMyHistory = async () => {
-    try {
-      const res = await fetch(
-        `${API}/api/Meal/History/${user.employeeId}`
-      );
-      const data = await res.json();
-
-      setRecords(data.records || []);
-      setTotal(data.totalAmount || 0);
-    } catch (err) {
-      console.error("Error:", err);
+  try {
+    if (!user) {
+      console.error("User not found in localStorage");
+      return;
     }
-  };
+
+    const employeeId = user?.employeeId || user?.id;
+
+    if (!employeeId) {
+      console.error("Employee ID missing");
+      return;
+    }
+
+    setLoading(true); 
+
+    const url = `${API}/api/Meal/MyHistory/${employeeId}`;
+    console.log("API CALL:", url);
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error("API Error:", res.status);
+      return;
+    }
+
+    const data = await res.json();
+
+    setRecords(data.records || []);
+    setTotal(data.totalAmount || 0);
+
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchMyHistory();
@@ -30,7 +54,7 @@ function MyHistory() {
     <div className="container">
       <h2>📊 My Meal History</h2>
 
-      <table>
+      <table border="1" cellPadding="10" style={{ width: "100%" }}>
         <thead>
           <tr>
             <th>Date</th>
@@ -44,8 +68,12 @@ function MyHistory() {
           {records.length > 0 ? (
             records.map((r, i) => (
               <tr key={i}>
-                <td>{new Date(r.mealDate).toLocaleDateString()}</td>
-                <td>{r.mealName}</td>
+                <td>
+                  {r.mealDate
+                    ? new Date(r.mealDate).toLocaleDateString()
+                    : "-"}
+                </td>
+                <td>{r.mealName || "-"}</td>
 
                 <td>
                   {r.foodNames && r.foodNames.length > 0
@@ -53,7 +81,7 @@ function MyHistory() {
                     : "No Food"}
                 </td>
 
-                <td>₹{r.fixedPrice}</td>
+                <td>₹{r.fixedPrice || 0}</td>
               </tr>
             ))
           ) : (

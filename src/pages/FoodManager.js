@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const API = "https://mealmanagement-backend-production.up.railway.app";
+const API = "https://localhost";
 
-function FoodManager() {
+function FoodManager({ setLoading }) {
   const [foods, setFoods] = useState([]);
   const [mealTypes, setMealTypes] = useState([]);
 
@@ -11,8 +11,11 @@ function FoodManager() {
   const [mealTypeId, setMealTypeId] = useState("");
 
   const [editId, setEditId] = useState(null);
+
   const loadData = async () => {
     try {
+      setLoading(true);
+
       let foodData = [];
       try {
         const foodRes = await fetch(`${API}/api/Food/All`);
@@ -21,6 +24,7 @@ function FoodManager() {
       } catch (e) {
         console.error("Food error:", e);
       }
+
       let mealData = [];
       try {
         const mealRes = await fetch(`${API}/api/MealType/All`);
@@ -32,9 +36,12 @@ function FoodManager() {
 
       setFoods(foodData);
       setMealTypes(mealData);
+
     } catch (err) {
       console.error(err);
       toast.error("Error loading data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,8 +59,10 @@ function FoodManager() {
       foodName: foodName.trim(),
       mealTypeId: Number(mealTypeId),
     };
-    console.log("BODY:", body);
+
     try {
+      setLoading(true);
+
       const url = editId
         ? `${API}/api/Food/Update/${editId}`
         : `${API}/api/Food/Add`;
@@ -65,12 +74,14 @@ function FoodManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+
       const text = await res.text();
-      console.log("SERVER RESPONSE:", text);
+
       if (!res.ok) {
         toast.error(text || "Operation Failed");
         return;
       }
+
       toast.success(editId ? "Food Updated" : "Food Added");
 
       setFoodName("");
@@ -78,9 +89,12 @@ function FoodManager() {
       setEditId(null);
 
       loadData();
+
     } catch (err) {
       console.error(err);
       toast.error("Error saving");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,19 +102,26 @@ function FoodManager() {
     if (!window.confirm("Delete this food?")) return;
 
     try {
+      setLoading(true);
+
       const res = await fetch(`${API}/api/Food/Delete/${id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) {
-        toast.error("Delete failed");
-        return;
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(data.message || "Deleted");
+        loadData();
+      } else {
+        const msg = await res.text();
+        console.error("Delete error:", msg);
+        toast.error(msg || "Delete failed");
       }
-
-      toast.success("Deleted");
-      loadData();
-    } catch {
-      toast.error("Error deleting");
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
     }
   };
 

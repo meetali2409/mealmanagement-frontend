@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "https://mealmanagement-backend-production.up.railway.app";
+const API = "https://localhost";
 
-function AdminDashboard() {
+function AdminDashboard({ setLoading }) {  
   const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
@@ -18,23 +18,32 @@ function AdminDashboard() {
 
   const loadEmployees = async () => {
     try {
+      setLoading(true); 
+
       const res = await fetch(`${API}/api/Employee/All`);
       const data = await res.json();
 
       setEmployees(Array.isArray(data) ? data : data.data || []);
     } catch {
       toast.error("Error loading employees");
+    } finally {
+      setLoading(false); 
     }
   };
 
   const loadStats = async () => {
     try {
+      setLoading(true);
+
       const plates = await fetch(`${API}/api/Meal/TodayTotalPlates`).then(r => r.json());
       const amount = await fetch(`${API}/api/Meal/TodayTotalAmount`).then(r => r.json());
 
       setTodayPlates(plates || 0);
       setTotalAmount(amount || 0);
     } catch { }
+    finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -49,6 +58,8 @@ function AdminDashboard() {
     }
 
     try {
+      setLoading(true); 
+
       const url = editEmpId
         ? `${API}/api/Employee/Update/${editEmpId}`
         : `${API}/api/Employee/Add`;
@@ -76,6 +87,8 @@ function AdminDashboard() {
       loadEmployees();
     } catch {
       toast.error("Error saving employee");
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -83,11 +96,13 @@ function AdminDashboard() {
     if (!window.confirm("Delete this employee?")) return;
 
     try {
+      setLoading(true);
+
       const res = await fetch(`${API}/api/Employee/${id}`, {
         method: "DELETE",
       });
 
-      console.log("STATUS:", res.status); 
+      console.log("STATUS:", res.status);
 
       if (!res.ok) {
         alert("Delete failed");
@@ -100,12 +115,16 @@ function AdminDashboard() {
     } catch (err) {
       console.error(err);
       alert("Error deleting");
+    } finally {
+      setLoading(false); 
     }
   };
+
   const editEmployee = (emp) => {
     setEmpName(emp.fullName);
     setEditEmpId(emp.employeeId);
   };
+
   const logout = () => {
     localStorage.clear();
     navigate("/login");

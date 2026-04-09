@@ -31,7 +31,7 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-        "https://mealmanagement-backend-production.up.railway.app/api/Employee/Login",
+        "https://localhost/api/Employee/Login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -75,7 +75,6 @@ function Login() {
       >
         <h2 className="login-title">Login</h2>
 
-        {/* EMAIL */}
         <div className="input-group">
           <input
             type="email"
@@ -86,7 +85,6 @@ function Login() {
           />
         </div>
 
-        {/* PASSWORD */}
         <div className=" input-group password-wrapper">
           <input
             type={showPassword ? "text" : "password"}
@@ -101,12 +99,10 @@ function Login() {
           </span>
         </div>
 
-        {/* BUTTON */}
         <button type="submit" className="login-btn" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        {/* REGISTER */}
         <p className="register-text">
           Don’t have an account? <Link to="/">Register</Link>
         </p>
