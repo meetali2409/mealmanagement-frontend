@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const API = "https://localhost";
+const API = "https://meetali-api-001.azurewebsites.net";
 
 function AdminDashboard({ setLoading }) {  
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const API = "https://localhost";
+const API = "https://meetali-api-001.azurewebsites.net";
 
 function MyHistory({ setLoading }) {
   const user = JSON.parse(localStorage.getItem("employee"));

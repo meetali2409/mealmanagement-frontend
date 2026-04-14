@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const API = "https://localhost";
+const API = "https://meetali-api-001.azurewebsites.net";
 
 function FoodManager({ setLoading }) {
   const [foods, setFoods] = useState([]);
@@ -84,7 +84,7 @@ function FoodManager({ setLoading }) {
 
       toast.success(editId ? "Food Updated" : "Food Added");
 
-      setFoodName("");
+      setFoodName(""); 
       setMealTypeId("");
       setEditId(null);
 

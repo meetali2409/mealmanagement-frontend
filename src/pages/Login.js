@@ -31,7 +31,7 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-        "https://localhost/api/Employee/Login",
+     "https://meetali-api-001.azurewebsites.net/api/Employee/Login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

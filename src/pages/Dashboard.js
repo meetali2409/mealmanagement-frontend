@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const API = "https://localhost";
+const API = "https://meetali-api-001.azurewebsites.net";
 
 function Dashboard({ setLoading }) {
   const user = JSON.parse(localStorage.getItem("employee"));

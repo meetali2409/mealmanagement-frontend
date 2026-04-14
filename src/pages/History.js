@@ -3,7 +3,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 function History({setLoading}) {
-  const API = "https://localhost";
+  const API = "https://meetali-api-001.azurewebsites.net";
 
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
