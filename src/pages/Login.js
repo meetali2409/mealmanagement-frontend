@@ -31,7 +31,7 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-       "https://meetali-api-001.azurewebsites.net/api/Auth/login",
+        "https://meetali-api-001.azurewebsites.net/api/Auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -43,7 +43,12 @@ function Login() {
       );
 
       if (!response.ok) {
-        toast.error("Invalid Credentials");
+        const errorData = await response.json();
+
+        toast.error(
+          errorData.message || "Invalid Credentials"
+        );
+
         return;
       }
 
