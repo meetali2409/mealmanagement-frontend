@@ -31,7 +31,7 @@ function Login() {
       setLoading(true);
 
       const response = await fetch(
-     "https://meetali-api-001.azurewebsites.net/api/Employee/Login",
+       "https://meetali-api-001.azurewebsites.net/api/Auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -49,7 +49,17 @@ function Login() {
 
       const data = await response.json();
 
-      localStorage.setItem("employee", JSON.stringify(data));
+      localStorage.setItem("token", data.token);
+
+      localStorage.setItem(
+        "employee",
+        JSON.stringify({
+          employeeId: data.employeeId,
+          fullName: data.fullName,
+          email: data.email,
+          role: data.role
+        })
+      );
 
       if (data.role === "Admin") {
         navigate("/admindashboard");
