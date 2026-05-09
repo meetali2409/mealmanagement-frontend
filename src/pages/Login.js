@@ -58,15 +58,10 @@ function Login() {
 
       localStorage.setItem(
         "employee",
-        JSON.stringify({
-          employeeId: data.employeeId,
-          fullName: data.fullName,
-          email: data.email,
-          role: data.role
-        })
+        JSON.stringify(data.employee)
       );
 
-      if (data.role === "Admin") {
+      if (data.employee.role === "Admin") {
         navigate("/admindashboard");
       } else {
         navigate("/dashboard");

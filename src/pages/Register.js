@@ -8,6 +8,8 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("User");
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -26,40 +28,58 @@ function Register() {
   }, [navigate]);
 
   const handleRegister = async () => {
-    if (!fullName.trim() || !password.trim() || !email.trim()) {
-      toast.warning("Name, Email and Password required!");
+    if (
+      !fullName.trim() ||
+      !password.trim() ||
+      !email.trim()
+    ) {
+      toast.warning(
+        "Name, Email and Password required!"
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      const response = await fetch(`${API}/api/Auth/Register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await fetch(
+        `${API}/api/Auth/Register`,
+        {
+          method: "POST",
 
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          password: password.trim(),
-          email: email.trim(),
-        }),
-      });
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            password: password.trim(),
+            email: email.trim(),
+            role: role
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || "Registered Successfully 🎉");
+        toast.success(
+          data.message ||
+          "Registered Successfully 🎉"
+        );
 
         navigate("/login");
       } else {
-        toast.error(data.message || "Registration failed");
+        toast.error(
+          data.message || "Registration failed"
+        );
       }
     } catch (error) {
       console.error(error);
 
-      toast.error("Server error. Please try again.");
+      toast.error(
+        "Server error. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -74,14 +94,18 @@ function Register() {
           handleRegister();
         }}
       >
-        <h2 className="login-title">Create Account</h2>
+        <h2 className="login-title">
+          Create Account
+        </h2>
 
         <input
           type="email"
           className="login-input"
           placeholder="Enter Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
         />
 
         <input
@@ -89,29 +113,61 @@ function Register() {
           className="login-input"
           placeholder="Full Name"
           value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          onChange={(e) =>
+            setFullName(e.target.value)
+          }
         />
+
+        <select
+          className="login-input"
+          value={role}
+          onChange={(e) =>
+            setRole(e.target.value)
+          }
+        >
+          <option value="User">User</option>
+          <option value="Admin">Admin</option>
+        </select>
 
         <div className="password-wrapper">
           <input
-            type={showPassword ? "text" : "password"}
+            type={
+              showPassword
+                ? "text"
+                : "password"
+            }
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
             className="login-input"
           />
 
-          <span onClick={() => setShowPassword(!showPassword)}>
+          <span
+            onClick={() =>
+              setShowPassword(!showPassword)
+            }
+          >
             {showPassword ? "🙈" : "👁"}
           </span>
         </div>
 
-        <button type="submit" className="login-btn" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
+        <button
+          type="submit"
+          className="login-btn"
+          disabled={loading}
+        >
+          {loading
+            ? "Registering..."
+            : "Register"}
         </button>
 
         <p className="register-text">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account?{" "}
+          <Link to="/login">
+            Login
+          </Link>
         </p>
       </form>
     </div>
