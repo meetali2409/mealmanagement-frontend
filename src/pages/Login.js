@@ -114,6 +114,13 @@ function Login() {
         </button>
 
         <p className="register-text">
+
+          <Link to="/forgotpassword">
+            Forgot Password?
+          </Link>
+
+        </p>
+        <p className="register-text">
           Don’t have an account? <Link to="/">Register</Link>
         </p>
       </form>

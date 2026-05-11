@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 const API = "https://meetali-api-001.azurewebsites.net";
 
-function AdminDashboard({ setLoading }) {  
+function AdminDashboard({ setLoading }) {
   const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
@@ -16,18 +16,37 @@ function AdminDashboard({ setLoading }) {
 
   const [search, setSearch] = useState("");
 
+  const token = localStorage.getItem("token");
+
   const loadEmployees = async () => {
     try {
-      setLoading(true); 
+      setLoading(true);
 
-      const res = await fetch(`${API}/api/Employee/All`);
+      const res = await fetch(
+        `${API}/api/Employee/All`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
       const data = await res.json();
 
-      setEmployees(Array.isArray(data) ? data : data.data || []);
+      setEmployees(
+        Array.isArray(data)
+          ? data
+          : data.data || []
+      );
+
     } catch {
       toast.error("Error loading employees");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -35,11 +54,27 @@ function AdminDashboard({ setLoading }) {
     try {
       setLoading(true);
 
-      const plates = await fetch(`${API}/api/Meal/TodayTotalPlates`).then(r => r.json());
-      const amount = await fetch(`${API}/api/Meal/TodayTotalAmount`).then(r => r.json());
+      const plates = await fetch(
+        `${API}/api/Meal/TodayTotalPlates`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      ).then((r) => r.json());
+
+      const amount = await fetch(
+        `${API}/api/Meal/TodayTotalAmount`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      ).then((r) => r.json());
 
       setTodayPlates(plates || 0);
       setTotalAmount(amount || 0);
+
     } catch { }
     finally {
       setLoading(false);
@@ -52,23 +87,32 @@ function AdminDashboard({ setLoading }) {
   }, []);
 
   const saveEmployee = async () => {
+
     if (!empName.trim()) {
       toast.warning("Enter employee name");
       return;
     }
 
     try {
-      setLoading(true); 
+      setLoading(true);
 
       const url = editEmpId
         ? `${API}/api/Employee/Update/${editEmpId}`
         : `${API}/api/Employee/Add`;
 
-      const method = editEmpId ? "PUT" : "POST";
+      const method = editEmpId
+        ? "PUT"
+        : "POST";
 
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
         body: JSON.stringify({
           employeeId: editEmpId,
           fullName: empName,
@@ -80,43 +124,61 @@ function AdminDashboard({ setLoading }) {
         return;
       }
 
-      toast.success(editEmpId ? "Updated" : "Added");
+      toast.success(
+        editEmpId
+          ? "Updated Successfully"
+          : "Added Successfully"
+      );
 
       setEmpName("");
       setEditEmpId(null);
+
       loadEmployees();
+
     } catch {
       toast.error("Error saving employee");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   const deleteEmployee = async (id) => {
-    if (!window.confirm("Delete this employee?")) return;
+
+    if (!window.confirm(
+      "Delete this employee?"
+    )) return;
 
     try {
       setLoading(true);
 
-      const res = await fetch(`${API}/api/Employee/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API}/api/Employee/${id}`,
+        {
+          method: "DELETE",
 
-      console.log("STATUS:", res.status);
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!res.ok) {
-        alert("Delete failed");
+        toast.error("Delete failed");
         return;
       }
 
-      alert("Deleted successfully");
+      toast.success("Deleted Successfully");
+
       loadEmployees();
 
     } catch (err) {
+
       console.error(err);
-      alert("Error deleting");
+
+      toast.error("Error deleting");
+
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -130,34 +192,60 @@ function AdminDashboard({ setLoading }) {
     navigate("/login");
   };
 
-  const filteredEmployees = employees.filter((e) =>
-    e.fullName?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredEmployees =
+    employees.filter((e) =>
+      e.fullName
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
 
   return (
     <div className="dashboard">
 
       <div className="dashboard-header">
+
         <h2>🚀 Admin Dashboard</h2>
 
         <div className="dashboard-actions">
-          <button onClick={() => navigate("/history")}>📊 History</button>
 
-          <button className="primary" onClick={() => navigate("/food")}>
+          <button
+            onClick={() =>
+              navigate("/history")
+            }
+          >
+            📊 History
+          </button>
+
+          <button
+            className="primary"
+            onClick={() =>
+              navigate("/food")
+            }
+          >
             🍽 Food
           </button>
 
-          <button className="primary" onClick={() => navigate("/mealtype")}>
+          <button
+            className="primary"
+            onClick={() =>
+              navigate("/mealtype")
+            }
+          >
             🥗 Meal Types
           </button>
 
-          <button className="logout-btn" onClick={logout}>
+          <button
+            className="logout-btn"
+            onClick={logout}
+          >
             Logout
           </button>
+
         </div>
       </div>
 
       <div className="summary-box">
+
         <div className="summary-card">
           <h4>Total Employees</h4>
           <p>{employees.length}</p>
@@ -172,29 +260,42 @@ function AdminDashboard({ setLoading }) {
           <h4>Total Revenue</h4>
           <p>₹{totalAmount}</p>
         </div>
+
       </div>
 
       <div className="card">
+
         <h3>👤 Employee Management</h3>
 
         <input
           placeholder="🔍 Search employee..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
         />
 
         <input
           placeholder="Enter employee name"
           value={empName}
-          onChange={(e) => setEmpName(e.target.value)}
+          onChange={(e) =>
+            setEmpName(e.target.value)
+          }
         />
 
-        <button className="primary" onClick={saveEmployee}>
-          {editEmpId ? "Update Employee" : "Add Employee"}
+        <button
+          className="primary"
+          onClick={saveEmployee}
+        >
+          {editEmpId
+            ? "Update Employee"
+            : "Add Employee"}
         </button>
 
         <div className="table-wrapper">
+
           <table>
+
             <thead>
               <tr>
                 <th>Name</th>
@@ -203,26 +304,55 @@ function AdminDashboard({ setLoading }) {
             </thead>
 
             <tbody>
+
               {filteredEmployees.length > 0 ? (
+
                 filteredEmployees.map((e) => (
+
                   <tr key={e.employeeId}>
+
                     <td>{e.fullName}</td>
+
                     <td>
-                      <button onClick={() => editEmployee(e)}>Edit</button>
-                      <button onClick={() => deleteEmployee(e.employeeId)}>
+
+                      <button
+                        onClick={() =>
+                          editEmployee(e)
+                        }
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteEmployee(
+                            e.employeeId
+                          )
+                        }
+                      >
                         Delete
                       </button>
+
                     </td>
                   </tr>
                 ))
+
               ) : (
+
                 <tr>
-                  <td colSpan="2">No employees found</td>
+                  <td colSpan="2">
+                    No employees found
+                  </td>
                 </tr>
+
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </div>
 
     </div>
